@@ -2,9 +2,10 @@ import {
     Column, 
     PrimaryGeneratedColumn, 
     CreateDateColumn,
+    UpdateDateColumn,
     TableInheritance, 
     Entity,
-    BaseEntity
+    BaseEntity,
 } from 'typeorm';
 
 @Entity()
@@ -36,4 +37,7 @@ export class User extends BaseEntity {
 
     @CreateDateColumn()
     createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 }
