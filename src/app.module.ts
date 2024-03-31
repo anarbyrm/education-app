@@ -13,7 +13,8 @@ import { Student } from './user/entities/student.entity';
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'db.sqlite',
-      entities: [ User, Admin, Tutor, Student ],
+      // entities: [ 'src/**/**/*.entity.ts'],
+      autoLoadEntities: true,
       synchronize: true
     }),
     UserModule,

@@ -9,17 +9,21 @@ import { Lecture } from './entities/lecture.entity';
 import { Category } from './entities/category.entity';
 import { Rating } from './entities/rating.entity';
 import { Review } from './entities/review.entity';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([
-        Course,
-        CourseContent,
-        ContentSection,
-        Lecture,
-        Category,
-        Rating,
-        Review
-    ])],
+    imports: [
+        TypeOrmModule.forFeature([
+            Course,
+            CourseContent,
+            ContentSection,
+            Lecture,
+            Category,
+            Rating,
+            Review
+        ]),
+        UserModule,
+    ],
     controllers: [CourseController],
     providers: [CourseService],
     exports: [TypeOrmModule]

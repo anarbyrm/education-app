@@ -8,6 +8,7 @@ import {
     BaseEntity,
 } from 'typeorm';
 
+
 @Entity()
 @TableInheritance({ column: {type: 'varchar', name: 'type'} })
 export class User extends BaseEntity {
