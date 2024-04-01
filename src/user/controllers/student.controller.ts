@@ -1,7 +1,21 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { 
+    Body, 
+    Controller, 
+    Get, 
+    HttpCode, 
+    HttpStatus,
+    Param,
+    ParseIntPipe, 
+    Patch, 
+    Post, 
+    UploadedFile, 
+    UseInterceptors
+} from '@nestjs/common';
 import { StudentService } from '../services/student.service';
 import { CreateStudentDto, TokenStudentDto, UpdateStudentDto } from '../dto/student.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { createMulterOptions } from '../utils/multer';
+import { OptionType } from '../interfaces/student.interface';
 
 
 @Controller('/students')
@@ -37,14 +51,13 @@ export class StudentController {
     }
 
     @Patch('/:id/avatar')
-    @UseInterceptors(FileInterceptor('photo'))
-    updateStudentPhoto(
+    @UseInterceptors(FileInterceptor('photo', createMulterOptions(OptionType.AVATAR)))
+    async updateStudentPhoto(
         @Param('id', ParseIntPipe) id: number,  
         @UploadedFile() imageFile: Express.Multer.File
-    ) {
-        // TODO: add file validation for size and mime types
-
-        console.log(imageFile)
+    ) { 
+        // TODO: update fix
+        return this.studentService.updatePhoto(id, imageFile)
     }
 
 }

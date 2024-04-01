@@ -1,3 +1,5 @@
+import { open } from 'fs/promises';
+import { normalize } from 'path';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -59,6 +61,12 @@ export class StudentService {
         student.lastName = lastName;
         student.bio = bio;
 
+        return this.studentRepository.save(student);
+    }
+
+    async updatePhoto(id: number, file: Express.Multer.File) {
+        const student = await this.fetchOne(id);
+        student.photo = file.path;
         return this.studentRepository.save(student);
     }
 }
