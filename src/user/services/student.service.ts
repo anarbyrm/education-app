@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Student } from '../entities/student.entity';
-import { CreateStudentDto, TokenStudentDto } from '../dto/student.dto';
+import { CreateStudentDto, TokenStudentDto, UpdateStudentDto } from '../dto/student.dto';
 import { checkPassword, hashPassword } from '../utils/password.util';
 import { IStudentQuery } from '../interfaces/student.interface'
 import { createToken } from '../utils/jwt.util';
@@ -15,7 +15,7 @@ export class StudentService {
         private studentRepository: Repository<Student>
     ) {}
     
-    fetchStudents(params?: IStudentQuery) {
+    fetchAll(params?: IStudentQuery) {
         const { email, active } = params || {};
         const query: IStudentQuery = {};
 
@@ -25,13 +25,13 @@ export class StudentService {
         return this.studentRepository.find({ where: query });
     }
 
-    async fetchOneStudent(id: number) {
+    async fetchOne(id: number) {
         const student = await this.studentRepository.findOneBy({ id });
         if (!student) throw new NotFoundException("No such user exists");
         return student;
     }
 
-    async createStudent(dto: CreateStudentDto) {
+    async create(dto: CreateStudentDto) {
         const hash = await hashPassword(dto.password);
         const newStudent = this.studentRepository.create({ email: dto.email, password: hash });
         return newStudent.save();
@@ -40,7 +40,7 @@ export class StudentService {
     async getToken(dto: TokenStudentDto) {
         const { email, password } = dto; 
         // check if user with specified email exists
-        const [student] = await this.fetchStudents({ email });
+        const [student] = await this.fetchAll({ email });
         if (!student) throw new BadRequestException("Email or password is wrong");
 
         // check if password correct
@@ -49,5 +49,16 @@ export class StudentService {
         
         const token = await createToken(student.id, email);
         return token;
+    }
+
+    async update(id: number, dto: UpdateStudentDto) {
+        const { firstName, lastName, bio } = dto;
+        const student = await this.fetchOne(id);
+        // update fields
+        student.firstName = firstName;
+        student.lastName = lastName;
+        student.bio = bio;
+
+        return this.studentRepository.save(student);
     }
 }

@@ -10,18 +10,18 @@ export class StudentController {
 
     @Get()
     fetchStudents() {
-        return this.studentService.fetchStudents();
+        return this.studentService.fetchAll();
     }
 
     @Get('/:id')
     fetchOneStudent(@Param('id', ParseIntPipe) id: number) {
-        return this.studentService.fetchOneStudent(id);
+        return this.studentService.fetchOne(id);
     }
 
     // sign up
     @Post()
     createStudent(@Body() dto: CreateStudentDto) {
-        return this.studentService.createStudent(dto);
+        return this.studentService.create(dto);
     }
 
     @HttpCode(HttpStatus.OK)
@@ -33,8 +33,7 @@ export class StudentController {
 
     @Patch('/:id')
     updateStudent(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateStudentDto) {
-        // TODO: implement student fields update
-        console.log(dto)
+        return this.studentService.update(id, dto);
     }
 
     @Patch('/:id/avatar')
