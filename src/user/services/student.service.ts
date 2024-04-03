@@ -96,11 +96,7 @@ export class StudentService {
     }
 
     async delete(id: number, permanent: boolean) {
-        if (!permanent) {
-            const student = await this.fetchOne(id);
-            student.isFrozen = true;
-            return this.studentRepository.save(student);
-        }
+        if (!permanent) return this.studentRepository.update(id, { isFrozen: true });
         return this.studentRepository.delete(id);
     }
 
