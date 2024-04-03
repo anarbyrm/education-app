@@ -18,7 +18,7 @@ import { StudentService } from '../services/student.service';
 import { CreateStudentDto, TokenStudentDto, UpdateStudentDto } from '../dto/student.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createMulterOptions } from '../utils/multer';
-import { OptionType } from '../interfaces/student.interface';
+import { IStudentQuery, OptionType } from '../interfaces/student.interface';
 
 
 @Controller('/students')
@@ -26,8 +26,12 @@ export class StudentController {
     constructor(private studentService: StudentService) {}
 
     @Get()
-    fetchStudents() {
-        return this.studentService.fetchAll();
+    fetchStudents(
+        @Query() query?: IStudentQuery,
+        @Query('limit', new ParseIntPipe({ optional: true})) limit?: number,
+        @Query('offset', new ParseIntPipe({ optional: true})) offset?: number    
+    ) {
+        return this.studentService.fetchAll(query, limit, offset);
     }
 
     @Get('/:id')
@@ -35,9 +39,10 @@ export class StudentController {
         return this.studentService.fetchOne(id);
     }
 
-    // sign up
     @Post()
     createStudent(@Body() dto: CreateStudentDto) {
+        // TODO: implement activation method with email or another method
+        // change isActive status to be "true"
         return this.studentService.create(dto);
     }
 

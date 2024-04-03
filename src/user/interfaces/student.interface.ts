@@ -1,7 +1,10 @@
 export interface IStudentQuery {
+    search?: string;
     email?: string;
-    active?: boolean;
+    active?: number;
+    frozen?: number;
 }
+
 
 type Payload = { [key: string]: (string | number) };
 

@@ -16,14 +16,22 @@ export class StudentService {
         private studentRepository: Repository<Student>
     ) {}
     
-    fetchAll(params?: IStudentQuery) {
-        const { email, active } = params || {};
-        const query: IStudentQuery = {};
+    async fetchAll(query?: IStudentQuery, limit: number = 10, offset: number = 0) {
+        const { search, email, active, frozen } = query || {};
 
-        if (email) query.email = email;
-        if (active) query.active = active;
+        let qb = this.studentRepository.createQueryBuilder();
 
-        return this.studentRepository.find({ where: query });
+        if (search) qb = qb.where('firstName LIKE :firstName', { firstName: `%${search}%` })
+                            .orWhere('lastName LIKE :lastName', { lastName: `%${search}%` })
+                            .orWhere('email LIKE :email', { email: `%${search}%` });
+
+        if (email) qb = qb.andWhere('email = :email', { email });
+        if (active) qb = qb.andWhere('isActive = :active', { active });
+        if (frozen) qb = qb.andWhere('isFrozen = :frozen', { frozen });
+        // pagination
+        qb = qb.limit(limit).offset(offset);
+        const [result, total] = await qb.getManyAndCount();
+        return { total, count: result.length, limit, offset, students: result };
     }
 
     async fetchOne(id: number) {
@@ -41,7 +49,7 @@ export class StudentService {
     async getToken(dto: TokenStudentDto) {
         const { email, password } = dto; 
         // check if user with specified email exists
-        const [student] = await this.fetchAll({ email });
+        const { students: [student] } = await this.fetchAll({ email });
         if (!student) throw new BadRequestException("Email or password is wrong");
 
         // check if password correct
@@ -95,7 +103,7 @@ export class StudentService {
         return this.studentRepository.save(student);
     }
 
-    async delete(id: number, permanent: boolean) {
+    delete(id: number, permanent: boolean) {
         if (!permanent) return this.studentRepository.update(id, { isFrozen: true });
         return this.studentRepository.delete(id);
     }
