@@ -1,4 +1,4 @@
-import { IsDefined, IsEmail, Min } from "class-validator";
+import { IsDefined, IsEmail, Length } from "class-validator";
 
 export class UserTokenDto {
     @IsEmail()
@@ -15,6 +15,6 @@ export class CreateUserDto {
     email: string;
 
     @IsDefined()
-    @Min(8)
+    @Length(8)
     password: string;
 }

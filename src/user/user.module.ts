@@ -7,12 +7,14 @@ import { Tutor } from './entities/tutor.entity';
 import { Student } from './entities/student.entity';
 import { User } from './entities/user.entity';
 import { MailService } from './utils/email.util';
+import { AdminController } from './controllers/admin.controller';
+import { AdminService } from './services/admin.service';
 
 
 @Module({
     imports: [TypeOrmModule.forFeature([User, Admin, Tutor, Student])],
-    controllers: [StudentController],
-    providers: [StudentService, MailService],
+    controllers: [StudentController, AdminController],
+    providers: [StudentService, MailService, AdminService],
     exports: [TypeOrmModule]
 })
 export class UserModule {}
