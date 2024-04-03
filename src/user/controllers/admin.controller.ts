@@ -30,9 +30,10 @@ export class AdminController {
         return this.adminService.create(dto);
     }
 
-    @Post()
-    login(@Body() dto: UserTokenDto) {
-        return this.adminService.createToken();
+    @Post('/auth/token')
+    async login(@Body() dto: UserTokenDto) {
+        const token = await this.adminService.createToken(dto);
+        return { token };
     }
 
     @Patch('/:id')

@@ -3,7 +3,9 @@ import { CreateAdminDto } from "../dto/admin.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Admin } from "../entities/admin.entity";
 import { Repository } from "typeorm";
-import { hashPassword } from "../utils/password.util";
+import { checkPassword, hashPassword } from "../utils/password.util";
+import { UserTokenDto } from "../dto/user.dto";
+import { createToken } from "../utils/jwt.util";
 
 
 @Injectable()
@@ -37,8 +39,19 @@ export class AdminService {
 
     update(id: number) {}
 
-    delete(id: number) {}
+    async delete(id: number) {
+        const admin = await this.fetchOne(id);
+        return this.adminRepository.delete(admin.id);
+    }
 
-    createToken() {}
+    async createToken(dto: UserTokenDto) {
+        const [admin] = await this.adminRepository.find({ where: { email: dto.email }});
+
+        const notFoundError = new NotFoundException("Email or password is wrong.")
+        if (!admin) throw notFoundError;
+        if (!checkPassword(dto.password, admin.password)) throw notFoundError;
+
+        return createToken(admin.id, admin.email);
+    }
 
 }
