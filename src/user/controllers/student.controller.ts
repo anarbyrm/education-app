@@ -15,10 +15,11 @@ import {
     UseInterceptors
 } from '@nestjs/common';
 import { StudentService } from '../services/student.service';
-import { CreateStudentDto, TokenStudentDto, UpdateStudentDto } from '../dto/student.dto';
+import { UpdateStudentDto } from '../dto/student.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createMulterOptions } from '../utils/multer';
 import { IStudentQuery, OptionType } from '../interfaces/student.interface';
+import { CreateUserDto, UserTokenDto } from '../dto/user.dto';
 
 
 @Controller('/students')
@@ -40,7 +41,7 @@ export class StudentController {
     }
 
     @Post()
-    createStudent(@Body() dto: CreateStudentDto) {
+    createStudent(@Body() dto: CreateUserDto) {
         return this.studentService.create(dto);
     }
 
@@ -51,7 +52,7 @@ export class StudentController {
 
     @HttpCode(HttpStatus.OK)
     @Post('/auth/token')
-    async getToken(@Body() dto: TokenStudentDto) {
+    async getToken(@Body() dto: UserTokenDto) {
         const token = await this.studentService.getToken(dto);
         return { token }
     }

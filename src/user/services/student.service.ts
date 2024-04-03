@@ -4,11 +4,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { Student } from '../entities/student.entity';
-import { CreateStudentDto, TokenStudentDto, UpdateStudentDto } from '../dto/student.dto';
+import { UpdateStudentDto } from '../dto/student.dto';
 import { checkPassword, hashPassword } from '../utils/password.util';
 import { IStudentQuery } from '../interfaces/student.interface'
 import { createToken } from '../utils/jwt.util';
 import { MailService } from '../utils/email.util';
+import { CreateUserDto, UserTokenDto } from '../dto/user.dto';
 
 
 @Injectable()
@@ -77,7 +78,7 @@ export class StudentService {
         return this.studentRepository.save(updatedStudent);
     }
 
-    async create(dto: CreateStudentDto) {
+    async create(dto: CreateUserDto) {
         const hash = await hashPassword(dto.password);
         const newStudent = this.studentRepository.create({ email: dto.email, password: hash });
         const { email } = newStudent; 
@@ -96,7 +97,7 @@ export class StudentService {
         return await newStudent.save();
     }
 
-    async getToken(dto: TokenStudentDto) {
+    async getToken(dto: UserTokenDto) {
         const { email, password } = dto; 
         // check if user with specified email exists
         const { students: [student] } = await this.fetchAll({ email });

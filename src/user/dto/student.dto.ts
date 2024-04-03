@@ -1,24 +1,5 @@
-import { IsDefined, IsEmail, IsOptional, IsString, IsStrongPassword } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 
-
-export class CreateStudentDto {
-    @IsEmail()
-    @IsDefined()
-    email: string;
-
-    @IsDefined()
-    @IsStrongPassword()
-    password: string;
-}
-
-export class TokenStudentDto {
-    @IsEmail()
-    @IsDefined()
-    email: string;
-
-    @IsDefined()
-    password: string;
-}
 
 export class UpdateStudentDto {
     @IsOptional()
