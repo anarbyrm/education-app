@@ -77,4 +77,21 @@ export class StudentService {
             throw err;
         }
     }
+
+    async removePhoto(id: number) {
+        const student = await this.fetchOne(id);
+        // set null to the value then delete current photo
+        const photo = student.photo;
+        
+        if (!photo) return this.studentRepository.save(student);
+
+        try {
+            await unlink(photo);
+        } catch (err) {
+            console.log((err as Error).message);
+        }
+
+        student.photo = null;
+        return this.studentRepository.save(student);
+    }
 }

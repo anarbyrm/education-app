@@ -1,6 +1,7 @@
 import { 
     Body, 
     Controller, 
+    Delete, 
     Get, 
     HttpCode, 
     HttpStatus,
@@ -56,7 +57,12 @@ export class StudentController {
         @Param('id', ParseIntPipe) id: number,  
         @UploadedFile() imageFile: Express.Multer.File
     ) { 
-        return this.studentService.updatePhoto(id, imageFile)
+        return this.studentService.updatePhoto(id, imageFile);
+    }
+
+    @Delete('/:id/avatar')
+    removePhoto(@Param('id', ParseIntPipe) id: number) {
+        return this.studentService.removePhoto(id);
     }
 
 }
