@@ -18,8 +18,9 @@ const setStorageOptions = (destinationPath: string) => {
             cb(null, destinationPath);
         },
         filename: (req: Express.Request, file: Express.Multer.File, cb: Callback) => {
-            const fileName = normalize(file.originalname);
-            const saveFileName = `${fileName}-${Date.now().toString()}.${extname(file.originalname)}`
+            const fileExt = extname(file.originalname);
+            const fileName = normalize(file.originalname.split(fileExt)[0]);
+            const saveFileName = `${fileName}-${Date.now().toString()}${fileExt}`
             cb(null, saveFileName);
         }
     
