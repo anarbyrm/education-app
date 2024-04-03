@@ -13,7 +13,7 @@ const setStorageOptions = (destinationPath: string) => {
     return {
         destination: (req: Express.Request, file: Express.Multer.File, cb: Callback) => {
             if (!existsSync(destinationPath)) {
-                mkdirSync(destinationPath);
+                mkdirSync(destinationPath, { recursive: true });
             }
             cb(null, destinationPath);
         },

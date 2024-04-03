@@ -1,5 +1,4 @@
-import { open } from 'fs/promises';
-import { normalize } from 'path';
+import { unlink } from 'fs/promises';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -65,8 +64,17 @@ export class StudentService {
     }
 
     async updatePhoto(id: number, file: Express.Multer.File) {
-        const student = await this.fetchOne(id);
-        student.photo = file.path;
-        return this.studentRepository.save(student);
+        try {
+            const student = await this.fetchOne(id);
+            const oldPhoto = student.photo;
+            student.photo = file.path;
+            // delete old photo if exists
+            if (oldPhoto) await unlink(oldPhoto);
+            return this.studentRepository.save(student);
+        } catch (err) {
+            // delete uploaded photo after error;
+            await unlink(file.path);
+            throw err;
+        }
     }
 }

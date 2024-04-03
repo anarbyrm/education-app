@@ -56,7 +56,6 @@ export class StudentController {
         @Param('id', ParseIntPipe) id: number,  
         @UploadedFile() imageFile: Express.Multer.File
     ) { 
-        // TODO: update fix
         return this.studentService.updatePhoto(id, imageFile)
     }
 
