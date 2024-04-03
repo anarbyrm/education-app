@@ -6,9 +6,11 @@ import {
     HttpCode, 
     HttpStatus,
     Param,
+    ParseBoolPipe,
     ParseIntPipe, 
     Patch, 
     Post, 
+    Query, 
     UploadedFile, 
     UseInterceptors
 } from '@nestjs/common';
@@ -63,6 +65,20 @@ export class StudentController {
     @Delete('/:id/avatar')
     removePhoto(@Param('id', ParseIntPipe) id: number) {
         return this.studentService.removePhoto(id);
+    }
+
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @Delete('/:id')
+    deleteStudent(
+        @Param('id', ParseIntPipe) id: number,
+        @Query('permanent', ParseBoolPipe) permanent?: boolean
+    ) {
+        return this.studentService.delete(id, permanent);
+    }
+
+    @Patch('/:id/unfreeze')
+    unfreezeStudent(@Param('id', ParseIntPipe) id: number) {
+        return this.studentService.unfreeze(id);
     }
 
 }

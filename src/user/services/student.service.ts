@@ -94,4 +94,17 @@ export class StudentService {
         student.photo = null;
         return this.studentRepository.save(student);
     }
+
+    async delete(id: number, permanent: boolean) {
+        if (!permanent) {
+            const student = await this.fetchOne(id);
+            student.isFrozen = true;
+            return this.studentRepository.save(student);
+        }
+        return this.studentRepository.delete(id);
+    }
+
+    unfreeze(id: number) {
+        return this.studentRepository.update(id, { isFrozen: false });
+    }
 }

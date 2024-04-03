@@ -36,6 +36,9 @@ export class User extends BaseEntity {
     @Column({ default: false })
     isActive: boolean;
 
+    @Column({ default: false })
+    isFrozen: boolean;
+
     @CreateDateColumn()
     createdAt: Date;
 
