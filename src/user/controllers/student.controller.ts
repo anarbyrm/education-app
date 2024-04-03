@@ -15,11 +15,10 @@ import {
     UseInterceptors
 } from '@nestjs/common';
 import { StudentService } from '../services/student.service';
-import { UpdateStudentDto } from '../dto/student.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createMulterOptions } from '../utils/multer';
 import { IStudentQuery, OptionType } from '../interfaces/student.interface';
-import { CreateUserDto, UserTokenDto } from '../dto/user.dto';
+import { CreateUserDto, UpdateUserDto, UserTokenDto } from '../dto/user.dto';
 
 
 @Controller('/students')
@@ -58,7 +57,7 @@ export class StudentController {
     }
 
     @Patch('/:id')
-    updateStudent(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateStudentDto) {
+    updateStudent(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
         return this.studentService.update(id, dto);
     }
 

@@ -4,12 +4,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { Student } from '../entities/student.entity';
-import { UpdateStudentDto } from '../dto/student.dto';
 import { checkPassword, hashPassword } from '../utils/password.util';
 import { IStudentQuery } from '../interfaces/student.interface'
 import { createToken } from '../utils/jwt.util';
 import { MailService } from '../utils/email.util';
-import { CreateUserDto, UserTokenDto } from '../dto/user.dto';
+import { CreateUserDto, UpdateUserDto, UserTokenDto } from '../dto/user.dto';
 
 
 @Injectable()
@@ -111,9 +110,10 @@ export class StudentService {
         return token;
     }
 
-    async update(id: number, dto: UpdateStudentDto) {
+    async update(id: number, dto: UpdateUserDto) {
         const { firstName, lastName, bio } = dto;
         const student = await this.fetchOne(id);
+
         // update fields
         student.firstName = firstName;
         student.lastName = lastName;
@@ -127,6 +127,7 @@ export class StudentService {
             const student = await this.fetchOne(id);
             const oldPhoto = student.photo;
             student.photo = file.path;
+
             // delete old photo if exists
             if (oldPhoto) await unlink(oldPhoto);
             return this.studentRepository.save(student);

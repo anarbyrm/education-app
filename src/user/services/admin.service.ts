@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { CreateAdminDto } from "../dto/admin.dto";
+import { CreateAdminDto, UpdateAdminDto } from "../dto/admin.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Admin } from "../entities/admin.entity";
 import { Repository } from "typeorm";
@@ -37,7 +37,18 @@ export class AdminService {
         return this.adminRepository.save(admin);
     }
 
-    update(id: number) {}
+    async update(id: number, dto: UpdateAdminDto) {
+        const { firstName, lastName, bio, role } = dto;
+        const admin = await this.fetchOne(id);
+
+        // update fields of admin entity
+        if (firstName) admin.firstName = firstName;
+        if (lastName) admin.lastName = lastName;
+        if (bio) admin.bio = bio;
+        if (role) admin.role = role;
+
+        return this.adminRepository.save(admin);
+    }
 
     async delete(id: number) {
         const admin = await this.fetchOne(id);

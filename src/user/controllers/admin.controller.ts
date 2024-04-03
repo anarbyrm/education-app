@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { AdminService } from "../services/admin.service";
 import { UserTokenDto } from "../dto/user.dto";
-import { CreateAdminDto } from "../dto/admin.dto";
+import { CreateAdminDto, UpdateAdminDto } from "../dto/admin.dto";
 
 @Controller('/admins')
 export class AdminController {
@@ -37,8 +37,8 @@ export class AdminController {
     }
 
     @Patch('/:id')
-    updateAdmin(@Param('id') id: number) {
-        return this.adminService.update(id);
+    updateAdmin(@Param('id') id: number, @Body() dto: UpdateAdminDto) {
+        return this.adminService.update(id, dto);
     }
 
     @Delete('/:id')
