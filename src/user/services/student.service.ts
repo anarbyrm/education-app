@@ -1,19 +1,22 @@
 import { unlink } from 'fs/promises';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as crypto from 'crypto';
 import { Student } from '../entities/student.entity';
 import { CreateStudentDto, TokenStudentDto, UpdateStudentDto } from '../dto/student.dto';
 import { checkPassword, hashPassword } from '../utils/password.util';
 import { IStudentQuery } from '../interfaces/student.interface'
 import { createToken } from '../utils/jwt.util';
+import { MailService } from '../utils/email.util';
 
 
 @Injectable()
 export class StudentService {
     constructor(
         @InjectRepository(Student)
-        private studentRepository: Repository<Student>
+        private studentRepository: Repository<Student>,
+        private mailService: MailService
     ) {}
     
     async fetchAll(query?: IStudentQuery, limit: number = 10, offset: number = 0) {
@@ -40,10 +43,57 @@ export class StudentService {
         return student;
     }
 
+    async createActivationToken(email: string) {
+        const secret = Buffer.alloc(32);
+        secret.write(process.env.SECRET || "", 'utf8');
+
+        const vector = Buffer.alloc(16);
+        vector.write(process.env.VECTOR || "", 'utf8');
+
+        const cipher = crypto.createCipheriv('aes-256-cbc', secret, vector);
+        let encrypted = cipher.update(JSON.stringify({ email }), 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+
+        return encrypted;
+    }
+
+    async verifyTokenAndActivateUser(token: string) {
+        const secret = Buffer.alloc(32);
+        secret.write(process.env.SECRET || "", 'utf8');
+
+        const vector = Buffer.alloc(16);
+        vector.write(process.env.VECTOR || "", 'utf8');
+    
+        const decipher = crypto.createDecipheriv("aes-256-cbc", secret, vector);
+        let decryptedToken = decipher.update(token, "hex", "utf-8");
+        decryptedToken += decipher.final("utf-8");
+
+        const { email } = JSON.parse(decryptedToken);
+        const { students: [student]} = await this.fetchAll({ email });
+
+        const updatedStudent = await this.studentRepository.findOne({ where: { id: student.id }});
+        updatedStudent.isActive = true;
+
+        return this.studentRepository.save(updatedStudent);
+    }
+
     async create(dto: CreateStudentDto) {
         const hash = await hashPassword(dto.password);
         const newStudent = this.studentRepository.create({ email: dto.email, password: hash });
-        return newStudent.save();
+        const { email } = newStudent; 
+
+        // create activation token
+        const token = await this.createActivationToken(email);
+        // send mail with html template has account activation link
+        const mailInfo = await this.mailService.sendActivationMail(email, token);
+
+        // check if activation mail sent, if not so 
+        // throw error to prevent user creation and 
+        // display proper error message.
+        const errorMessage = 'An error occured during user creation. Please retry again later';
+        if ((mailInfo).rejected.length > 0) throw new InternalServerErrorException(errorMessage);
+
+        return await newStudent.save();
     }
 
     async getToken(dto: TokenStudentDto) {

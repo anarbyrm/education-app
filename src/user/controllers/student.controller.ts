@@ -41,9 +41,12 @@ export class StudentController {
 
     @Post()
     createStudent(@Body() dto: CreateStudentDto) {
-        // TODO: implement activation method with email or another method
-        // change isActive status to be "true"
         return this.studentService.create(dto);
+    }
+
+    @Get('/account/activate')
+    activateAccount(@Query('token') token: string) {
+        return this.studentService.verifyTokenAndActivateUser(token);
     }
 
     @HttpCode(HttpStatus.OK)
