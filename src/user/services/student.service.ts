@@ -60,11 +60,13 @@ export class StudentService {
         // check if user with specified email exists
         const { students: [student] } = await this.fetchAll({ email });
         if (!student) throw new BadRequestException("Email or password is wrong");
-
         // check if password correct
         if (!await checkPassword(password, student.password))
-        throw new BadRequestException("Email or password is wrong");
+            throw new BadRequestException("Email or password is wrong");
         
+        if (!student.isActive) 
+            throw new BadRequestException("Your account is not activated.");
+
         const token = await createToken(student.id, email);
         return token;
     }
