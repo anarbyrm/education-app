@@ -12,6 +12,7 @@ import {
     Post, 
     Query, 
     UploadedFile, 
+    UseGuards, 
     UseInterceptors
 } from '@nestjs/common';
 import { StudentService } from '../services/student.service';
@@ -19,6 +20,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { createMulterOptions } from '../utils/multer';
 import { IStudentQuery, OptionType } from '../interfaces/student.interface';
 import { CreateUserDto, UpdateUserDto, UserTokenDto } from '../dto/user.dto';
+import { IsAdminGuard } from '../guards/admin.guard';
+import { IsAdminOrOwnsEntityGuard, LogInGuard } from '../guards/user.guards';
 
 
 @Controller('/students')
@@ -26,6 +29,7 @@ export class StudentController {
     constructor(private studentService: StudentService) {}
 
     @Get()
+    @UseGuards(LogInGuard, IsAdminGuard)
     fetchStudents(
         @Query() query?: IStudentQuery,
         @Query('limit', new ParseIntPipe({ optional: true})) limit?: number,
@@ -35,6 +39,7 @@ export class StudentController {
     }
 
     @Get('/:id')
+    @UseGuards(LogInGuard, IsAdminGuard)
     fetchOneStudent(@Param('id', ParseIntPipe) id: number) {
         return this.studentService.fetchOne(id);
     }
@@ -57,11 +62,13 @@ export class StudentController {
     }
 
     @Patch('/:id')
+    @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
     updateStudent(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
         return this.studentService.update(id, dto);
     }
 
     @Patch('/:id/avatar')
+    @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
     @UseInterceptors(FileInterceptor('photo', createMulterOptions(OptionType.AVATAR)))
     async updateStudentPhoto(
         @Param('id', ParseIntPipe) id: number,  
@@ -71,12 +78,14 @@ export class StudentController {
     }
 
     @Delete('/:id/avatar')
+    @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
     removePhoto(@Param('id', ParseIntPipe) id: number) {
         return this.studentService.removePhoto(id);
     }
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete('/:id')
+    @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
     deleteStudent(
         @Param('id', ParseIntPipe) id: number,
         @Query('permanent', ParseBoolPipe) permanent?: boolean
@@ -85,6 +94,7 @@ export class StudentController {
     }
 
     @Patch('/:id/unfreeze')
+    @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
     unfreezeStudent(@Param('id', ParseIntPipe) id: number) {
         return this.studentService.unfreeze(id);
     }
