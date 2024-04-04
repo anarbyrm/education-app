@@ -24,7 +24,7 @@ import { IsAdminGuard } from '../guards/admin.guard';
 import { IsAdminOrOwnsEntityGuard, LogInGuard } from '../guards/user.guards';
 
 
-@Controller('/students')
+@Controller('/users/students')
 export class StudentController {
     constructor(private studentService: StudentService) {}
 

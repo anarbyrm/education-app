@@ -13,7 +13,7 @@ import { UserTokenDto } from "../dto/user.dto";
 import { CreateAdminDto, UpdateAdminDto } from "../dto/admin.dto";
 import { IsAdminGuard } from "../guards/admin.guard";
 
-@Controller('/admins')
+@Controller('/users/admins')
 @UseGuards(IsAdminGuard)
 export class AdminController {
     constructor(private adminService: AdminService) {}

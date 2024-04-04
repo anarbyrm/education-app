@@ -6,7 +6,7 @@ import { ExtendedRequest } from "../interfaces/request.interface";
 export class UserContoller {
     constructor() {}
 
-    @Get('current')
+    @Get('/current')
     currentUser(@Req() request: ExtendedRequest) {
         return request.user
     }
