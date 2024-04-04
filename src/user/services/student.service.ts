@@ -2,14 +2,14 @@ import { unlink } from 'fs/promises';
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as crypto from 'crypto';
 import { Student } from '../entities/student.entity';
 import { checkPassword, hashPassword } from '../utils/password.util';
-import { IStudentQuery } from '../interfaces/student.interface'
 import { createToken } from '../utils/jwt.util';
 import { MailService } from '../utils/email.util';
 import { CreateUserDto, UpdateUserDto, UserTokenDto } from '../dto/user.dto';
 import { createCipher } from '../utils/cipher.util';
+import { IUserFilterQuery } from '../interfaces/user.interface';
+import { buildQuery } from '../user.helper';
 
 
 @Injectable()
@@ -20,18 +20,10 @@ export class StudentService {
         private mailService: MailService
     ) {}
     
-    async fetchAll(query?: IStudentQuery, limit: number = 10, offset: number = 0) {
-        const { search, email, active, frozen } = query || {};
-
+    async fetchAll(query?: IUserFilterQuery, limit: number = 10, offset: number = 0) {
         let qb = this.studentRepository.createQueryBuilder();
+        qb = buildQuery<Student>(qb, query);
 
-        if (search) qb = qb.where('firstName LIKE :firstName', { firstName: `%${search}%` })
-                            .orWhere('lastName LIKE :lastName', { lastName: `%${search}%` })
-                            .orWhere('email LIKE :email', { email: `%${search}%` });
-
-        if (email) qb = qb.andWhere('email = :email', { email });
-        if (active) qb = qb.andWhere('isActive = :active', { active });
-        if (frozen) qb = qb.andWhere('isFrozen = :frozen', { frozen });
         // pagination
         qb = qb.limit(limit).offset(offset);
         const [result, total] = await qb.getManyAndCount();
@@ -89,36 +81,34 @@ export class StudentService {
         return this.studentRepository.save(student);
     }
 
-    async updatePhoto(id: number, file: Express.Multer.File) {
+    async updatePhoto(id: number, image: Express.Multer.File) {
         try {
             const student = await this.fetchOne(id);
             const oldPhoto = student.photo;
-            student.photo = file.path;
+            student.photo = image.path;
 
             // delete old photo if exists
+            const updatedStudent = await this.studentRepository.save(student);
             if (oldPhoto) await unlink(oldPhoto);
-            return this.studentRepository.save(student);
+            return updatedStudent;
         } catch (err) {
             // delete uploaded photo after error;
-            await unlink(file.path);
+            await unlink(image.path);
             throw err;
         }
     }
 
     async removePhoto(id: number) {
         const student = await this.fetchOne(id);
-        // set null to the value then delete current photo
         const photo = student.photo;
-        
-        if (!photo) return this.studentRepository.save(student);
 
         try {
             await unlink(photo);
+            student.photo = null;
         } catch (err) {
             console.log((err as Error).message);
         }
 
-        student.photo = null;
         return this.studentRepository.save(student);
     }
 

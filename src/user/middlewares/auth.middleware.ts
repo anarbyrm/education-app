@@ -13,7 +13,7 @@ export class VerifyTokenMiddleware implements NestMiddleware {
         if (req.headers?.authorization) {
             const auth = req.headers.authorization;
             const [prefix, token] = auth.split(' ');
-            console.log(token)
+
             if (prefix === 'Bearer' && token) {
                 const { userId } = await decodeToken(token);
                 const user = await this.userService.findOne(parseInt(userId));

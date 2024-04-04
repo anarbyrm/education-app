@@ -18,10 +18,11 @@ import {
 import { StudentService } from '../services/student.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createMulterOptions } from '../utils/multer';
-import { IStudentQuery, OptionType } from '../interfaces/student.interface';
+import { OptionType } from '../interfaces/student.interface';
 import { CreateUserDto, UpdateUserDto, UserTokenDto } from '../dto/user.dto';
 import { IsAdminGuard } from '../guards/admin.guard';
 import { IsAdminOrOwnsEntityGuard, LogInGuard } from '../guards/user.guards';
+import { IUserFilterQuery } from '../interfaces/user.interface';
 
 
 @Controller('/users/students')
@@ -31,7 +32,7 @@ export class StudentController {
     @Get()
     @UseGuards(LogInGuard, IsAdminGuard)
     fetchStudents(
-        @Query() query?: IStudentQuery,
+        @Query() query?: IUserFilterQuery,
         @Query('limit', new ParseIntPipe({ optional: true})) limit?: number,
         @Query('offset', new ParseIntPipe({ optional: true})) offset?: number    
     ) {
@@ -64,8 +65,8 @@ export class StudentController {
 
     @Patch('/:id/avatar')
     @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
-    @UseInterceptors(FileInterceptor('photo', createMulterOptions(OptionType.AVATAR)))
-    async updateStudentPhoto(
+    @UseInterceptors(FileInterceptor('image', createMulterOptions(OptionType.AVATAR)))
+    updateStudentPhoto(
         @Param('id', ParseIntPipe) id: number,  
         @UploadedFile() imageFile: Express.Multer.File
     ) { 
