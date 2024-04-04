@@ -76,4 +76,8 @@ export class TutorService {
 
         return this.tutorRepository.save(tutor);
     }
+
+    unfreeze(id: number) {
+        return this.tutorRepository.update(id, { isFrozen: false });
+    }
 }

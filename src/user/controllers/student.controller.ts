@@ -19,7 +19,7 @@ import { StudentService } from '../services/student.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createMulterOptions } from '../utils/multer';
 import { OptionType } from '../interfaces/student.interface';
-import { CreateUserDto, UpdateUserDto, UserTokenDto } from '../dto/user.dto';
+import { CreateUserDto, UpdateUserDto } from '../dto/user.dto';
 import { IsAdminGuard } from '../guards/admin.guard';
 import { IsAdminOrOwnsEntityGuard, LogInGuard } from '../guards/user.guards';
 import { IUserFilterQuery } from '../interfaces/user.interface';
@@ -48,13 +48,6 @@ export class StudentController {
     @Post()
     createStudent(@Body() dto: CreateUserDto) {
         return this.studentService.create(dto);
-    }
-
-    @Post('/auth/token')
-    @HttpCode(HttpStatus.OK)
-    async getToken(@Body() dto: UserTokenDto) {
-        const token = await this.studentService.getToken(dto);
-        return { token }
     }
 
     @Patch('/:id')

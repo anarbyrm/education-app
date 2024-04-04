@@ -1,12 +1,11 @@
 import { unlink } from 'fs/promises';
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Student } from '../entities/student.entity';
-import { checkPassword, hashPassword } from '../utils/password.util';
-import { createToken } from '../utils/jwt.util';
+import { hashPassword } from '../utils/password.util';
 import { MailService } from '../utils/email.util';
-import { CreateUserDto, UpdateUserDto, UserTokenDto } from '../dto/user.dto';
+import { CreateUserDto, UpdateUserDto } from '../dto/user.dto';
 import { createCipher } from '../utils/cipher.util';
 import { IUserFilterQuery } from '../interfaces/user.interface';
 import { buildQuery } from '../user.helper';
@@ -53,22 +52,6 @@ export class StudentService {
         if ((mailInfo).rejected.length > 0) throw new InternalServerErrorException(errorMessage);
 
         return await newStudent.save();
-    }
-
-    async getToken(dto: UserTokenDto) {
-        const { email, password } = dto; 
-        // check if user with specified email exists
-        const { students: [student] } = await this.fetchAll({ email });
-        if (!student) throw new BadRequestException("Email or password is wrong");
-        // check if password correct
-        if (!await checkPassword(password, student.password))
-            throw new BadRequestException("Email or password is wrong");
-        
-        if (!student.isActive) 
-            throw new BadRequestException("Your account is not activated.");
-
-        const token = await createToken(student.id, email);
-        return token;
     }
 
     async update(id: number, dto: UpdateUserDto) {

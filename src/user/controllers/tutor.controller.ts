@@ -79,4 +79,10 @@ export class TutorController {
     removePhoto(@Query('id', ParseIntPipe) id: number) {
         return this.tutorService.removePhoto(id);
     }
+
+    @Patch('/:id/unfreeze')
+    @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
+    unfreezeTutor(@Param('id', ParseIntPipe) id: number) {
+        return this.tutorService.unfreeze(id);
+    }
 }
