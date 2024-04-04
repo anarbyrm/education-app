@@ -50,8 +50,8 @@ export class StudentController {
         return this.studentService.create(dto);
     }
 
-    @HttpCode(HttpStatus.OK)
     @Post('/auth/token')
+    @HttpCode(HttpStatus.OK)
     async getToken(@Body() dto: UserTokenDto) {
         const token = await this.studentService.getToken(dto);
         return { token }
@@ -79,8 +79,8 @@ export class StudentController {
         return this.studentService.removePhoto(id);
     }
 
-    @HttpCode(HttpStatus.NO_CONTENT)
     @Delete('/:id')
+    @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
     deleteStudent(
         @Param('id', ParseIntPipe) id: number,

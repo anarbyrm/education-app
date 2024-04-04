@@ -11,6 +11,7 @@ import {
     Post, 
     Query, 
     UploadedFile, 
+    UseGuards, 
     UseInterceptors
 } from "@nestjs/common";
 import { TutorService } from "../services/tutor.service";
@@ -19,6 +20,7 @@ import { IUserFilterQuery } from "../interfaces/user.interface";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { createMulterOptions } from "../utils/multer";
 import { OptionType } from "../interfaces/student.interface";
+import { IsAdminOrOwnsEntityGuard, LogInGuard } from "../guards/user.guards";
 
 
 @Controller('/users/tutors')
@@ -26,6 +28,7 @@ export class TutorController {
     constructor(private tutorService: TutorService) {}
 
     @Get()
+    @UseGuards(LogInGuard)
     fetchAll(
         @Query() query: IUserFilterQuery,
         @Query('limit', new ParseIntPipe({ optional: true })) limit: number,
@@ -35,6 +38,7 @@ export class TutorController {
     }
 
     @Get('/:id')
+    @UseGuards(LogInGuard)
     fetchOne(@Param('id', ParseIntPipe) id: number) {
         return this.tutorService.findOne(id);
     }
@@ -44,13 +48,15 @@ export class TutorController {
         return this.tutorService.create(dto);
     }
 
-    @HttpCode(HttpStatus.NO_CONTENT)
     @Delete('/:id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
     delete(@Param('id', ParseIntPipe) id: number) {
         return this.tutorService.delete(id);
     }
 
     @Patch('/:id')
+    @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
     updateInfo(
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: UpdateUserDto
@@ -59,6 +65,7 @@ export class TutorController {
     }
 
     @Patch('/:id/avatar')
+    @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
     @UseInterceptors(FileInterceptor('image', createMulterOptions(OptionType.AVATAR)))
     updatePhoto(
         @Query('id', ParseIntPipe) id: number,
@@ -68,6 +75,7 @@ export class TutorController {
     }
 
     @Delete('/:id/avatar')
+    @UseGuards(LogInGuard, IsAdminOrOwnsEntityGuard)
     removePhoto(@Query('id', ParseIntPipe) id: number) {
         return this.tutorService.removePhoto(id);
     }
