@@ -5,13 +5,16 @@ import {
     Get, 
     Param, 
     Patch, 
-    Post 
+    Post, 
+    UseGuards
 } from "@nestjs/common";
 import { AdminService } from "../services/admin.service";
 import { UserTokenDto } from "../dto/user.dto";
 import { CreateAdminDto, UpdateAdminDto } from "../dto/admin.dto";
+import { IsAdminGuard } from "../guards/admin.guard";
 
 @Controller('/admins')
+@UseGuards(IsAdminGuard)
 export class AdminController {
     constructor(private adminService: AdminService) {}
 
