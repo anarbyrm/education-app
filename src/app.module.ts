@@ -1,11 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { CourseModule } from './course/course.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user/entities/user.entity';
-import { Admin } from './user/entities/admin.entity';
-import { Tutor } from './user/entities/tutor.entity';
-import { Student } from './user/entities/student.entity';
+import { VerifyTokenMiddleware } from './user/middlewares/auth.middleware';
+import { UserService } from './user/services/user.service';
 
 
 @Module({
@@ -23,4 +21,9 @@ import { Student } from './user/entities/student.entity';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+      consumer.apply(VerifyTokenMiddleware)
+              .forRoutes('*');
+    }
+}

@@ -14,7 +14,7 @@ export const createToken = async (userId: number, email: string) => {
     return token;
 }
 
-export const verifyToken = async (token: string) => {
+export const decodeToken = async (token: string) => {
     const decode = await verify(token, SECRET);
     return decode;
 }
