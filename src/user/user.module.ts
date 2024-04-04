@@ -10,11 +10,12 @@ import { MailService } from './utils/email.util';
 import { AdminController } from './controllers/admin.controller';
 import { AdminService } from './services/admin.service';
 import { UserService } from './services/user.service';
+import { UserContoller } from './controllers/user.contoller';
 
 
 @Module({
     imports: [TypeOrmModule.forFeature([User, Admin, Tutor, Student])],
-    controllers: [StudentController, AdminController],
+    controllers: [StudentController, AdminController, UserContoller],
     providers: [StudentService, MailService, AdminService, UserService],
     exports: [TypeOrmModule, UserService]
 })
