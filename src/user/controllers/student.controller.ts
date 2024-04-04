@@ -17,7 +17,7 @@ import {
 } from '@nestjs/common';
 import { StudentService } from '../services/student.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { createMulterOptions } from '../utils/multer';
+import { createMulterOptions } from '../../utils/multer';
 import { OptionType } from '../interfaces/student.interface';
 import { CreateUserDto, UpdateUserDto } from '../dto/user.dto';
 import { IsAdminGuard } from '../guards/admin.guard';

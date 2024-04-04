@@ -6,7 +6,7 @@ import { Repository } from "typeorm";
 import { CreateUserDto, UpdateUserDto } from "../dto/user.dto";
 import { IUserFilterQuery } from "../interfaces/user.interface";
 import { buildQuery } from "../user.helper";
-import { hashPassword } from "../utils/password.util";
+import { hashPassword } from "../../utils/password.util";
 
 
 @Injectable()

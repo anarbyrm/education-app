@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req } from "@
 import { ExtendedRequest } from "../interfaces/request.interface";
 import { UserService } from "../services/user.service";
 import { UserTokenDto } from "../dto/user.dto";
+import { User } from "../entities/user.entity";
 
 
 @Controller('/users')
@@ -9,7 +10,7 @@ export class UserContoller {
     constructor(private userService: UserService) {}
 
     @Get('/current')
-    currentUser(@Req() request: ExtendedRequest) {
+    currentUser(@Req() request: ExtendedRequest<User>) {
         return request.user
     }
 

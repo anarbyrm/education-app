@@ -1,7 +1,7 @@
 import { sign as _sign, verify as _verify } from 'jsonwebtoken';
 import { promisify } from 'util';
 import * as dotenv from 'dotenv'
-import { SignFunction, VerifyFunction } from '../interfaces/student.interface';
+import { SignFunction, VerifyFunction } from '../user/interfaces/student.interface';
 
 dotenv.config();
 

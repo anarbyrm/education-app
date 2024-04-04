@@ -3,9 +3,9 @@ import { CreateAdminDto, UpdateAdminDto } from "../dto/admin.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Admin } from "../entities/admin.entity";
 import { Repository } from "typeorm";
-import { checkPassword, hashPassword } from "../utils/password.util";
+import { checkPassword, hashPassword } from "../../utils/password.util";
 import { UserTokenDto } from "../dto/user.dto";
-import { createToken } from "../utils/jwt.util";
+import { createToken } from "../../utils/jwt.util";
 
 
 @Injectable()

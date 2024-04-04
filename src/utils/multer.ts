@@ -2,7 +2,7 @@ import { diskStorage, Options, DiskStorageOptions, FileFilterCallback } from 'mu
 import * as dotenv from 'dotenv';
 import { extname, join, normalize } from 'path';
 import { BadRequestException } from '@nestjs/common';
-import { OptionType } from '../interfaces/student.interface';
+import { OptionType } from '../user/interfaces/student.interface';
 import { existsSync, mkdirSync } from 'fs';
 
 dotenv.config();

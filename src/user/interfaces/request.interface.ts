@@ -1,6 +1,5 @@
 import { Request } from "express";
-import { User } from "../entities/user.entity";
 
-export interface ExtendedRequest extends Request {
-    user?: User;
+export interface ExtendedRequest<T> extends Request {
+    user?: T;
 }

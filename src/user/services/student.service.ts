@@ -3,10 +3,10 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Student } from '../entities/student.entity';
-import { hashPassword } from '../utils/password.util';
-import { MailService } from '../utils/email.util';
+import { hashPassword } from '../../utils/password.util';
+import { MailService } from '../../utils/email.util';
 import { CreateUserDto, UpdateUserDto } from '../dto/user.dto';
-import { createCipher } from '../utils/cipher.util';
+import { createCipher } from '../../utils/cipher.util';
 import { IUserFilterQuery } from '../interfaces/user.interface';
 import { buildQuery } from '../user.helper';
 

@@ -18,7 +18,7 @@ import { TutorService } from "../services/tutor.service";
 import { CreateUserDto, UpdateUserDto } from "../dto/user.dto";
 import { IUserFilterQuery } from "../interfaces/user.interface";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { createMulterOptions } from "../utils/multer";
+import { createMulterOptions } from "../../utils/multer";
 import { OptionType } from "../interfaces/student.interface";
 import { IsAdminOrOwnsEntityGuard, LogInGuard } from "../guards/user.guards";
 
