@@ -9,6 +9,7 @@ import { IStudentQuery } from '../interfaces/student.interface'
 import { createToken } from '../utils/jwt.util';
 import { MailService } from '../utils/email.util';
 import { CreateUserDto, UpdateUserDto, UserTokenDto } from '../dto/user.dto';
+import { createCipher } from '../utils/cipher.util';
 
 
 @Injectable()
@@ -43,47 +44,13 @@ export class StudentService {
         return student;
     }
 
-    async createActivationToken(email: string) {
-        const secret = Buffer.alloc(32);
-        secret.write(process.env.SECRET || "", 'utf8');
-
-        const vector = Buffer.alloc(16);
-        vector.write(process.env.VECTOR || "", 'utf8');
-
-        const cipher = crypto.createCipheriv('aes-256-cbc', secret, vector);
-        let encrypted = cipher.update(JSON.stringify({ email }), 'utf8', 'hex');
-        encrypted += cipher.final('hex');
-
-        return encrypted;
-    }
-
-    async verifyTokenAndActivateUser(token: string) {
-        const secret = Buffer.alloc(32);
-        secret.write(process.env.SECRET || "", 'utf8');
-
-        const vector = Buffer.alloc(16);
-        vector.write(process.env.VECTOR || "", 'utf8');
-    
-        const decipher = crypto.createDecipheriv("aes-256-cbc", secret, vector);
-        let decryptedToken = decipher.update(token, "hex", "utf-8");
-        decryptedToken += decipher.final("utf-8");
-
-        const { email } = JSON.parse(decryptedToken);
-        const { students: [student]} = await this.fetchAll({ email });
-
-        const updatedStudent = await this.studentRepository.findOne({ where: { id: student.id }});
-        updatedStudent.isActive = true;
-
-        return this.studentRepository.save(updatedStudent);
-    }
-
     async create(dto: CreateUserDto) {
         const hash = await hashPassword(dto.password);
         const newStudent = this.studentRepository.create({ email: dto.email, password: hash });
         const { email } = newStudent; 
 
         // create activation token
-        const token = await this.createActivationToken(email);
+        const token = createCipher({ email });
         // send mail with html template has account activation link
         const mailInfo = await this.mailService.sendActivationMail(email, token);
 
