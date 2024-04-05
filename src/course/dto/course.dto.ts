@@ -5,21 +5,25 @@ import {
     IsOptional, 
     Min, 
     Max, 
-    IsNumber 
+    IsNumber, 
+    Length
 } from 'class-validator';
 
 
 export class CreateCourseDto {
     @IsDefined()
     @IsString()
+    @Length(5, 50)
     title: string;
 
     @IsOptional()
     @IsString()
+    @Length(5, 120)
     short_description: string;
 
     @IsOptional()
     @IsString()
+    @Length(5, 750)
     description: string;
 
     @Max(9999.99)

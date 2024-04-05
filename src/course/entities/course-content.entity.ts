@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, OneToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Course } from './course.entity';
 import { ContentSection } from './content-section.entity';
 
@@ -11,6 +11,7 @@ export class CourseContent {
     @OneToMany(() => ContentSection, (section) => section.content)
     sections: ContentSection[];
 
-    @OneToOne(() => Course, (course) => course.content)
+    @OneToOne(() => Course)
+    @JoinColumn()
     course: Course;
 }

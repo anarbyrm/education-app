@@ -11,6 +11,9 @@ export class ContentSection {
     @Column({ length: 50 })
     title: string;
 
+    @Column()
+    order: number;
+
     @ManyToOne(() => CourseContent, (content) => content.sections)
     content: CourseContent;
 

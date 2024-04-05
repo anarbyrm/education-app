@@ -6,7 +6,8 @@ import { LogInGuard } from 'src/user/guards/user.guards';
 import { ExtendedRequest } from 'src/user/interfaces/request.interface';
 import { IsTutorOrAdmin } from 'src/user/guards/tutor.guard';
 import { Tutor } from 'src/user/entities/tutor.entity';
-import { Admin } from 'src/user/entities/admin.entity';
+import { CreateSectionDto } from './dto/section.dto';
+
 
 @Controller('/courses')
 export class CourseController {
@@ -33,5 +34,18 @@ export class CourseController {
         @Req() request: ExtendedRequest<Tutor>
     ) {
         return this.courseService.create(dto, request.user);
+    }
+
+    @Post('/:id/sections')
+    addSection(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Body() dto: CreateSectionDto
+    ) {
+        return this.courseService.addSection(id, dto);
+    }
+
+    @Get('/:id/sections')
+    getSections(@Param('id', ParseUUIDPipe) id: string) {
+        return this.courseService.getSections(id);
     }
 }

@@ -8,8 +8,7 @@ import {
     ManyToOne,
     ManyToMany,
     OneToMany,
-    JoinTable,
-    JoinColumn
+    JoinTable
 } from 'typeorm';
 
 import { Student } from 'src/user/entities/student.entity';
@@ -56,8 +55,7 @@ export class Course {
     updatedAt: Date;
 
     // relations
-    @OneToOne(() => CourseContent)
-    @JoinColumn()
+    @OneToOne(() => CourseContent, (content) => content.course)
     content: CourseContent;
 
     @ManyToOne(() => Category, (category) => category.courses)
