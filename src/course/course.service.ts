@@ -1,7 +1,7 @@
 import slugify from 'slugify';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { ICourseQuery } from './interfaces/course.interface';
 import { CreateCourseDto } from './dto/course.dto';
@@ -18,7 +18,8 @@ export class CourseService {
         @InjectRepository(CourseContent)
         private contentRepository: Repository<CourseContent>,
         @InjectRepository(ContentSection)
-        private sectionRepository: Repository<ContentSection>
+        private sectionRepository: Repository<ContentSection>,
+        private entityManager: EntityManager
     ) {}
 
     async findAll(query: ICourseQuery = {}, limit: number = 25, offset: number = 0) {
@@ -35,29 +36,34 @@ export class CourseService {
     }
 
     async create(dto: CreateCourseDto, user: Tutor) {
-        // if slug is not provided create custom slug from title of course
-        const rawSlugText = `${dto.title}-${Date.now().toString()}`;
-        const slug = dto.slug ? dto.slug : slugify(rawSlugText, { lower: true });
-        const course = this.courseRepository.create({ ...dto, slug });
-        // set instructor the current user
-        course.instructor = user;
-        course.content = await this.contentRepository.save({});
-        return this.courseRepository.save(course);
+        this.entityManager.transaction(async (manager) => {
+            // if slug is not provided create custom slug from title of course
+            const rawSlugText = `${dto.title}-${Date.now().toString()}`;
+            const slug = dto.slug ? dto.slug : slugify(rawSlugText, { lower: true });
+            const course = manager.create(Course, { ...dto, slug });
+            // set instructor the current user
+            course.instructor = user;
+            // create content for new course
+            const content = manager.create(CourseContent, {})
+            course.content = await manager.save(CourseContent, content);
+            return manager.save(Course, course);
+        });
     }
 
-    async addSection(id: string, dto: CreateSectionDto) {
-        // TODO: Add transcation
-        const course = await this.courseRepository.findOne({
-             where: { id },
-             relations: ['content']
+    addSection(id: string, dto: CreateSectionDto) {
+        this.entityManager.transaction(async (manager) => {
+            const course = await manager.findOne(Course, {
+                 where: { id },
+                 relations: ['content']
+            });
+            const content = course.content;
+            const newSection = manager.create(ContentSection, {
+                title: dto.title,
+                order: dto.order
+            });
+            newSection.content = content;
+            return manager.save(ContentSection, newSection);
         });
-        const content = course.content;
-        const newSection = this.sectionRepository.create({
-            title: dto.title,
-            order: dto.order
-        });
-        newSection.content = content;
-        return this.sectionRepository.save(newSection);
     }
 
     async getSections(id: string) {
