@@ -4,11 +4,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { ICourseQuery } from './interfaces/course.interface';
-import { CreateCourseDto } from './dto/course.dto';
+import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
 import { Tutor } from 'src/user/entities/tutor.entity';
 import { CourseContent } from './entities/course-content.entity';
 import { ContentSection } from './entities/content-section.entity';
-import { CreateSectionDto } from './dto/section.dto';
+import { CreateSectionDto, UpdateSectionDto } from './dto/section.dto';
 
 @Injectable()
 export class CourseService {
@@ -43,7 +43,7 @@ export class CourseService {
         if (maxPrice) qb = qb.andWhere('course.discountedPrice <= :maxPrice', { maxPrice: Number(maxPrice) });
         if (paid) qb = qb.andWhere('course.isPaid is :paid', { paid: Boolean(paid) });
         if (published) qb = qb.andWhere('course.isPublished is :published', { published: Boolean(paid) });
-        // group rating by course id
+        // group ratings by course id
         qb = qb.groupBy('course.id');
         if (rating) qb = qb.having('AVG(rate.value) >= :rating', { rating: Number(rating) });
 
@@ -73,6 +73,15 @@ export class CourseService {
             course.content = await manager.save(CourseContent, content);
             return manager.save(Course, course);
         });
+    }
+
+    deleteCourse(id: string) {
+        return this.courseRepository.delete(id);
+    }
+
+    async updateCourse(id: string, dto: UpdateCourseDto) {
+        if (Object.keys(dto).length === 0) return this.findOne(id);
+        return this.courseRepository.update(id, dto);
     }
 
     addSection(id: string, dto: CreateSectionDto) {
@@ -108,5 +117,14 @@ export class CourseService {
             return { ...section, lectureCount }
         })
         return { total: sections.length, sections: sections }
+    }
+
+    deleteSection(sectionId: number) {
+        return this.sectionRepository.delete(sectionId);
+    }
+
+    updateSection(sectionId: number, dto: UpdateSectionDto) {
+        if (Object.keys(dto).length === 0) return this.sectionRepository.findOneBy({ id: sectionId });
+        return this.sectionRepository.update(sectionId, dto);
     }
 }
