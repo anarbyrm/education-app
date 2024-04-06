@@ -32,13 +32,19 @@ export const createMulterOptions = (field: OptionType) => {
     const destionationPath = join('./uploads', optionType)
 
     const storageOptions = setStorageOptions(destionationPath);
-
+    const fileSize = field === OptionType.AVATAR
+                        ? +process.env.AVATAR_MAX_SIZE || 1.5 * 10 ** 6 // 1.5MB
+                        : +process.env.VIDEO_MAX_SIZE || 1 * 10 ** 9    // 1GB
     return {
         limits: {
-            fileSize: +process.env.AVATAR_MAX_SIZE || 0
+            fileSize: fileSize
         },
         fileFilter: (req: Express.Request, file: Express.Multer.File, cb: FileFilterCallback) => {
-            if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+            const fileRegEx = field === OptionType.AVATAR 
+                                ? /\/(jpg|jpeg|png)$/
+                                : /\/(mp4|webm|ogg|avi|mov|flv|mkv|wmv)$/
+
+            if (file.mimetype.match(fileRegEx)) {
                 cb(null, true);
             } else {
                 cb(new BadRequestException(`Unsupported file type ${extname(file.originalname)}`));

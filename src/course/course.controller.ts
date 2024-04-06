@@ -12,7 +12,9 @@ import {
     Post, 
     Query, 
     Req, 
-    UseGuards
+    UploadedFile, 
+    UseGuards,
+    UseInterceptors
  } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { ICourseQuery } from './interfaces/course.interface';
@@ -22,12 +24,19 @@ import { ExtendedRequest } from 'src/user/interfaces/request.interface';
 import { IsTutorOrAdmin } from 'src/user/guards/tutor.guard';
 import { Tutor } from 'src/user/entities/tutor.entity';
 import { CreateSectionDto, UpdateSectionDto } from './dto/section.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { createMulterOptions } from 'src/utils/multer';
+import { OptionType } from 'src/user/interfaces/student.interface';
+import { CreateLectureDto, UpdateLectureDto } from './dto/lecture.dto';
 
 
 @Controller('/courses')
 export class CourseController {
     constructor(private courseService: CourseService) {}
 
+    /* -----------------------------------------------
+    ------------------COURSE ROUTES-------------------
+    --------------------------------------------------*/
     @Get()
     fetchAll(
         @Query() query?: ICourseQuery,
@@ -54,19 +63,21 @@ export class CourseController {
     @Delete('/:id')
     @UseGuards(LogInGuard, IsTutorOrAdmin)
     @HttpCode(HttpStatus.NO_CONTENT)
-    deleteCourse(@Param('id') id: string) {
+    deleteCourse(@Param('id', ParseUUIDPipe) id: string) {
         return this.courseService.deleteCourse(id);
     }
 
     @Patch('/:id')
     @UseGuards(LogInGuard, IsTutorOrAdmin)
     updateCourse(
-        @Param('id') id: string,
+        @Param('id', ParseUUIDPipe) id: string,
         @Body() dto: UpdateCourseDto
     ) {
         return this.courseService.updateCourse(id, dto);
     }
-
+    /* -----------------------------------------------
+    --------------COURSE SECTIONS ROUTES --------------
+    --------------------------------------------------*/
     @Post('/:id/sections')
     @UseGuards(LogInGuard, IsTutorOrAdmin)
     addSection(
@@ -97,5 +108,48 @@ export class CourseController {
         @Body() dto: UpdateSectionDto
     ) {
         return this.courseService.updateSection(sectionId, dto);
+    }
+
+    /* -----------------------------------------------
+    -------------COURSE LECTURES ROUTES---------------
+    --------------------------------------------------*/
+    @Get('/:courseId/lectures')
+    fetchCourseLectures(
+        @Param('courseId', ParseUUIDPipe) courseId: string
+    ) {
+        return this.courseService.fetchLectures(courseId);
+    }
+
+    @Get('/lectures/:lectureId')
+    fetchOneLecture(
+        @Param('lectureId', ParseUUIDPipe) lectureId: string
+    ) {
+        return this.courseService.fetchOneLecture(lectureId);
+    }
+
+    @Post('/sections/:sectionId/lectures')
+    @UseInterceptors(FileInterceptor('file', createMulterOptions(OptionType.LECTURE)))
+    uploadLecture(
+        @Param('sectionId', ParseIntPipe) sectionId: number,
+        @UploadedFile() file: Express.Multer.File,
+        @Body() dto: CreateLectureDto
+    ) {
+        return this.courseService.createLecture(sectionId, file, dto);
+    }
+
+    @Delete('/lectures/:lectureId')
+    deleteLecture(
+        @Param('lectureId') lectureId: string
+    ) {
+        return this.courseService.deleteLecture(lectureId);
+    }
+
+    @Patch('/lectures/:lectureId')
+    updateLecture(
+        @Param('lectureId') lectureId: string,
+        @UploadedFile() file: Express.Multer.File,
+        @Body() dto: UpdateLectureDto
+    ) {
+        return this.courseService.updateLecture(lectureId, file, dto);
     }
 }

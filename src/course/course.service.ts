@@ -1,3 +1,4 @@
+import { unlink } from 'fs/promises';
 import slugify from 'slugify';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +10,9 @@ import { Tutor } from 'src/user/entities/tutor.entity';
 import { CourseContent } from './entities/course-content.entity';
 import { ContentSection } from './entities/content-section.entity';
 import { CreateSectionDto, UpdateSectionDto } from './dto/section.dto';
+import { Lecture } from './entities/lecture.entity';
+import { CreateLectureDto, UpdateLectureDto } from './dto/lecture.dto';
+import path from 'path';
 
 @Injectable()
 export class CourseService {
@@ -19,6 +23,8 @@ export class CourseService {
         private contentRepository: Repository<CourseContent>,
         @InjectRepository(ContentSection)
         private sectionRepository: Repository<ContentSection>,
+        @InjectRepository(Lecture)
+        private lectureRepository: Repository<Lecture>,
         private entityManager: EntityManager
     ) {}
 
@@ -126,5 +132,54 @@ export class CourseService {
     updateSection(sectionId: number, dto: UpdateSectionDto) {
         if (Object.keys(dto).length === 0) return this.sectionRepository.findOneBy({ id: sectionId });
         return this.sectionRepository.update(sectionId, dto);
+    }
+
+    async fetchLectures(courseId: string) {
+        const [lectures, total] = await this.lectureRepository.findAndCount({
+            where: {
+                section: {
+                    content: {
+                        course: {
+                            id: courseId
+                        }
+                    }
+                }
+            },
+            order: {
+                order: 'ASC'
+            }
+        });
+
+        return { total, lectures }
+    }
+
+    async fetchOneLecture(lectureId: string) {
+        const lecture = await this.lectureRepository.findOneBy({ id: lectureId });
+        if (!lecture) throw new NotFoundException('Lecture with specified id not found.');
+        return lecture;
+    }
+
+    async createLecture(sectionId: number, file: Express.Multer.File, dto: CreateLectureDto) {
+        const filePath = file.path;
+        const section = await this.sectionRepository.findOneBy({ id: sectionId });
+        if (!section) throw new NotFoundException('Section with specified id not found.');
+
+        try {
+            const newLecture = this.lectureRepository.create(dto)
+            newLecture.url = filePath;
+            newLecture.section = section;
+            return this.lectureRepository.save(newLecture);
+        } catch (err) {
+            await unlink(filePath);
+            throw err;
+        }
+    }
+
+    deleteLecture(lectureId: string) {
+        return this.lectureRepository.delete(lectureId);
+    }
+
+    updateLecture(lectureId: string, file: Express.Multer.File, dto: UpdateLectureDto) {
+        // TODO: implement update lecture functionality
     }
 }
