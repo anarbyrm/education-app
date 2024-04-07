@@ -1,6 +1,9 @@
 import { unlink } from 'fs/promises';
+import { stat, createReadStream } from 'fs';
+import { promisify } from 'util';
 import slugify from 'slugify';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { basename } from 'path';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
@@ -13,6 +16,8 @@ import { CreateSectionDto, UpdateSectionDto } from './dto/section.dto';
 import { Lecture } from './entities/lecture.entity';
 import { CreateLectureDto, UpdateLectureDto } from './dto/lecture.dto';
 
+
+const statPromise = promisify(stat);
 
 @Injectable()
 export class CourseService {
@@ -172,6 +177,44 @@ export class CourseService {
         const lecture = await this.lectureRepository.findOneBy({ id: lectureId });
         if (!lecture) throw new NotFoundException('Lecture with specified id not found.');
         return lecture;
+    }
+
+    async fetchAndStreamLecture(lectureId: string, range: string) {
+        console.log(range)
+        const lecture = await this.fetchOneLecture(lectureId);
+        const filepath = lecture.url;
+        const filename = basename(filepath);
+        const fileStats = await statPromise(lecture.url);
+        const filesize = fileStats.size;
+        const mimetype = `video/${filepath.split('.').at(-1)}`;
+
+        // manage ranges requested
+        let [startRange, endRange] = range?.replace('bytes=', '').split('-');
+        let start = parseInt(startRange);
+        let end = parseInt(endRange);
+
+        if (end >= filesize) end = filesize;
+
+        if (isNaN(start) || isNaN(end)) {
+            const errMessage = 'Range values attached request headers must be numeric string'
+            throw new HttpException(errMessage, HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+        }
+        const bytesize = end - start + 1;
+
+        const stream = createReadStream(filepath, { start, end });
+        const streamableFile = new StreamableFile(stream, {
+            disposition: `inline; filename=${filename}`,
+            type: mimetype,
+            length: bytesize
+        });
+
+        return { 
+            stream: streamableFile,
+            start,
+            end,
+            bytesize, 
+            filesize
+        }
     }
 
     async createLecture(sectionId: number, file: Express.Multer.File, dto: CreateLectureDto) {

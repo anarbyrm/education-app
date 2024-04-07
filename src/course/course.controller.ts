@@ -1,9 +1,11 @@
 import { 
+    BadRequestException,
     Body, 
     Controller, 
     DefaultValuePipe, 
     Delete, 
     Get, 
+    Headers, 
     HttpCode, 
     HttpStatus, 
     Param, 
@@ -14,6 +16,7 @@ import {
     Post, 
     Query, 
     Req, 
+    Res, 
     UploadedFile, 
     UseGuards,
     UseInterceptors
@@ -30,6 +33,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { createMulterOptions } from 'src/utils/multer';
 import { OptionType } from 'src/user/interfaces/student.interface';
 import { CreateLectureDto, UpdateLectureDto } from './dto/lecture.dto';
+import { IncomingHttpHeaders } from 'http';
+import { Response } from 'express';
 
 
 @Controller('/courses')
@@ -134,6 +139,32 @@ export class CourseController {
         @Param('lectureId', ParseUUIDPipe) lectureId: string
     ) {
         return this.courseService.fetchOneLecture(lectureId);
+    }
+    
+    @Get('/lectures/:lectureId/stream')
+    @HttpCode(HttpStatus.PARTIAL_CONTENT)
+    async steamLecture(
+        @Headers('range') range: string,
+        @Param('lectureId', ParseUUIDPipe) lectureId: string,
+        @Res({ passthrough: true }) response: Response
+    ) { 
+        if (!range) throw new BadRequestException('No range value found in request header.');
+
+        const {
+            stream,
+            start,
+            end,
+            filesize,
+            bytesize
+        } = await this.courseService.fetchAndStreamLecture(lectureId, range);
+
+        response.set({
+            'Accept-Ranges': 'bytes',
+            'Content-Range': `bytes ${start}-${end}/${filesize}`,
+            'Content-Length': bytesize
+        });
+
+        return stream;
     }
 
     @Post('/sections/:sectionId/lectures')
