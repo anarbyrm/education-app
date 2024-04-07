@@ -19,7 +19,7 @@ export class StudentService {
         private mailService: MailService
     ) {}
     
-    async fetchAll(query?: IUserFilterQuery, limit: number = 10, offset: number = 0) {
+    async fetchAll(query?: IUserFilterQuery, limit = 10, offset = 0) {
         let qb = this.studentRepository.createQueryBuilder();
         qb = buildQuery<Student>(qb, query);
 

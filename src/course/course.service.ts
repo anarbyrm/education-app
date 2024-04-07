@@ -12,7 +12,7 @@ import { ContentSection } from './entities/content-section.entity';
 import { CreateSectionDto, UpdateSectionDto } from './dto/section.dto';
 import { Lecture } from './entities/lecture.entity';
 import { CreateLectureDto, UpdateLectureDto } from './dto/lecture.dto';
-import path from 'path';
+
 
 @Injectable()
 export class CourseService {
@@ -28,7 +28,7 @@ export class CourseService {
         private entityManager: EntityManager
     ) {}
 
-    async findAll(query: Partial<ICourseQuery> = {}, limit: number = 25, offset: number = 0) {
+    async findAll(query: Partial<ICourseQuery> = {}, limit = 25, offset = 0) {
         const { 
             search,
             minPrice,
@@ -52,6 +52,10 @@ export class CourseService {
         // group ratings by course id
         qb = qb.groupBy('course.id');
         if (rating) qb = qb.having('AVG(rate.value) >= :rating', { rating: Number(rating) });
+
+        //pagination
+        if (limit) qb = qb.limit(limit);
+        if (offset) qb = qb.offset(offset);
 
         const courses = await qb.getRawMany();
         const total = await qb.getCount();
@@ -134,7 +138,7 @@ export class CourseService {
         return this.sectionRepository.update(sectionId, dto);
     }
 
-    async fetchLectures(courseId: string) {
+    async fetchCourseLectures(courseId: string) {
         const [lectures, total] = await this.lectureRepository.findAndCount({
             where: {
                 section: {
@@ -151,6 +155,17 @@ export class CourseService {
         });
 
         return { total, lectures }
+    }
+
+    async fetchSectionLectures(sectionId: number) {
+        const [lectures, total] = await this.lectureRepository.findAndCount({
+            where: {
+                section: {
+                    id: sectionId
+                }
+            }
+        })
+        return { total, lectures };
     }
 
     async fetchOneLecture(lectureId: string) {
@@ -179,7 +194,18 @@ export class CourseService {
         return this.lectureRepository.delete(lectureId);
     }
 
-    updateLecture(lectureId: string, file: Express.Multer.File, dto: UpdateLectureDto) {
-        // TODO: implement update lecture functionality
+    async updateLecture(lectureId: string, dto: UpdateLectureDto, file?: Express.Multer.File) {
+        const lecture = await this.fetchOneLecture(lectureId);
+        const oldFile = lecture.url;
+        try {
+            if (file) lecture.url = file.path;
+            const updatedLecture = await this.lectureRepository.save(Object.assign({}, lecture, dto));
+            // if update is successful delete old related file.
+            if (file) await unlink(oldFile);
+            return updatedLecture;
+        } catch (err) {
+            if (file) await unlink(file.path);
+            throw err;
+        }
     }
 }

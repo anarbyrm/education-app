@@ -1,11 +1,13 @@
 import { 
     Body, 
     Controller, 
+    DefaultValuePipe, 
     Delete, 
     Get, 
     HttpCode, 
     HttpStatus, 
     Param, 
+    ParseFilePipe, 
     ParseIntPipe, 
     ParseUUIDPipe, 
     Patch, 
@@ -40,8 +42,8 @@ export class CourseController {
     @Get()
     fetchAll(
         @Query() query?: ICourseQuery,
-        @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
-        @Query('offset', new ParseIntPipe({ optional: true })) offset?: number
+        @Query('limit', new DefaultValuePipe(25), ParseIntPipe) limit?: number,
+        @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset?: number
     ) {
         return this.courseService.findAll(query, limit, offset);
     }
@@ -117,7 +119,14 @@ export class CourseController {
     fetchCourseLectures(
         @Param('courseId', ParseUUIDPipe) courseId: string
     ) {
-        return this.courseService.fetchLectures(courseId);
+        return this.courseService.fetchCourseLectures(courseId);
+    }
+
+    @Get('/sections/:sectionId/lectures')
+    fetchSectionLectures(
+        @Param('sectionId', ParseIntPipe) sectionId: number
+    ) {
+        return this.courseService.fetchSectionLectures(sectionId);
     }
 
     @Get('/lectures/:lectureId')
@@ -131,7 +140,7 @@ export class CourseController {
     @UseInterceptors(FileInterceptor('file', createMulterOptions(OptionType.LECTURE)))
     uploadLecture(
         @Param('sectionId', ParseIntPipe) sectionId: number,
-        @UploadedFile() file: Express.Multer.File,
+        @UploadedFile(ParseFilePipe) file: Express.Multer.File,
         @Body() dto: CreateLectureDto
     ) {
         return this.courseService.createLecture(sectionId, file, dto);
@@ -147,9 +156,9 @@ export class CourseController {
     @Patch('/lectures/:lectureId')
     updateLecture(
         @Param('lectureId') lectureId: string,
-        @UploadedFile() file: Express.Multer.File,
+        @UploadedFile(new ParseFilePipe({ fileIsRequired: false })) file: Express.Multer.File,
         @Body() dto: UpdateLectureDto
     ) {
-        return this.courseService.updateLecture(lectureId, file, dto);
+        return this.courseService.updateLecture(lectureId, dto, file);
     }
 }
