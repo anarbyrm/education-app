@@ -16,6 +16,9 @@ export class OwnsCourseGuard implements CanActivate {
         const course = await courseRepo.findOne({
             where: {
                 id: courseId
+            },
+            relations: {
+                instructor: true
             }
         })
         return req.user.id === course.instructor.id || req.user instanceof Admin;

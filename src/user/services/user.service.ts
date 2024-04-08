@@ -48,6 +48,6 @@ export class UserService {
             throw new BadRequestException("Your account is not activated.");
 
         const token = await createToken(student.id, email);
-        return token;
+        return { token }
     }
 }

@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware } from "@nestjs/common";
+import { Injectable, NestMiddleware, UnauthorizedException } from "@nestjs/common";
 import { Response, NextFunction } from 'express';
 import { UserService } from "../services/user.service";
 import { decodeToken } from "../../utils/jwt.util";
@@ -18,6 +18,7 @@ export class VerifyTokenMiddleware implements NestMiddleware {
             if (prefix === 'Bearer' && token) {
                 const { userId } = await decodeToken(token);
                 const user = await this.userService.findOne(parseInt(userId));
+                if (user.isActive !== true) throw new UnauthorizedException('Not authorized');
                 req.user = user;
             }
         }
