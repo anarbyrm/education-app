@@ -3,9 +3,15 @@ import { stat, createReadStream } from 'fs';
 import { promisify } from 'util';
 import slugify from 'slugify';
 import { basename } from 'path';
-import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
+import { 
+    HttpException, 
+    HttpStatus, 
+    Injectable, 
+    NotFoundException, 
+    StreamableFile 
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Admin, EntityManager, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { ICourseQuery } from './interfaces/course.interface';
 import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
@@ -84,13 +90,13 @@ export class CourseService {
             const slug = dto.slug ? dto.slug : slugify(rawSlugText, { lower: true });
             // check if isPaid value is false then set prices to be '0'
             if (dto.isPaid === false) dto.price = 0;
-            const course = manager.create(Course, { ...dto, slug });
+            const course = this.courseRepository.create({ ...dto, slug });
             // set instructor the current user
             course.instructor = user;
             // create content for new course
-            const content = manager.create(CourseContent, {})
-            course.content = await manager.save(CourseContent, content);
-            return manager.save(Course, course);
+            const content = this.contentRepository.create({});
+            course.content = await manager.save(content);
+            return manager.save(course);
         });
     }
 
