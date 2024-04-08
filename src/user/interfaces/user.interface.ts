@@ -6,8 +6,8 @@ import { User } from "../entities/user.entity";
 export interface IUserFilterQuery {
     search?: string;
     email?: string;
-    active?: number;
-    frozen?: number;
+    active?: string;
+    frozen?: string;
 }
 
 export type UserType = User | Admin | Tutor | Student;

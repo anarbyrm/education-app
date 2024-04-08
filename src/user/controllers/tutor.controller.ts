@@ -1,6 +1,7 @@
 import { 
     Body, 
     Controller, 
+    DefaultValuePipe, 
     Delete, 
     Get, 
     HttpCode, 
@@ -30,8 +31,8 @@ export class TutorController {
     @Get()
     fetchAll(
         @Query() query: IUserFilterQuery,
-        @Query('limit', new ParseIntPipe({ optional: true })) limit: number,
-        @Query('offset', new ParseIntPipe({ optional: true })) offset: number
+        @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+        @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number
     ) {
         return this.tutorService.findAll(query, limit, offset);
     }
