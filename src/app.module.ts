@@ -3,7 +3,6 @@ import { UserModule } from './user/user.module';
 import { CourseModule } from './course/course.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { VerifyTokenMiddleware } from './user/middlewares/auth.middleware';
-import { UserService } from './user/services/user.service';
 
 
 @Module({

@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { User } from "src/user/entities/user.entity";
 import { ExtendedRequest } from "src/user/interfaces/request.interface";
 import { CourseService } from "../course.service";
-import { Admin } from "typeorm";
+import { Admin } from "src/user/entities/admin.entity";
 
 
 @Injectable()

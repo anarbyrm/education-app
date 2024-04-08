@@ -28,7 +28,6 @@ export class TutorController {
     constructor(private tutorService: TutorService) {}
 
     @Get()
-    @UseGuards(LogInGuard)
     fetchAll(
         @Query() query: IUserFilterQuery,
         @Query('limit', new ParseIntPipe({ optional: true })) limit: number,
@@ -38,7 +37,6 @@ export class TutorController {
     }
 
     @Get('/:id')
-    @UseGuards(LogInGuard)
     fetchOne(@Param('id', ParseIntPipe) id: number) {
         return this.tutorService.findOne(id);
     }

@@ -31,7 +31,6 @@ export class StudentController {
     constructor(private studentService: StudentService) {}
 
     @Get()
-    @UseGuards(LogInGuard, IsAdminGuard)
     fetchStudents(
         @Query() query?: IUserFilterQuery,
         @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
@@ -41,7 +40,6 @@ export class StudentController {
     }
 
     @Get('/:id')
-    @UseGuards(LogInGuard, IsAdminGuard)
     fetchOneStudent(@Param('id', ParseIntPipe) id: number) {
         return this.studentService.fetchOne(id);
     }
@@ -88,5 +86,4 @@ export class StudentController {
     unfreezeStudent(@Param('id', ParseIntPipe) id: number) {
         return this.studentService.unfreeze(id);
     }
-
 }
