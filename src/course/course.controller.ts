@@ -33,8 +33,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { createMulterOptions } from 'src/utils/multer';
 import { OptionType } from 'src/user/interfaces/student.interface';
 import { CreateLectureDto, UpdateLectureDto } from './dto/lecture.dto';
-import { IncomingHttpHeaders } from 'http';
 import { Response } from 'express';
+import { OwnsCourseGuard } from './guards/owns-course.guard';
 
 
 @Controller('/courses')
@@ -85,36 +85,50 @@ export class CourseController {
     /* -----------------------------------------------
     --------------COURSE SECTIONS ROUTES --------------
     --------------------------------------------------*/
-    @Post('/:id/sections')
-    @UseGuards(LogInGuard, IsTutorOrAdmin)
+    @Post('/:courseId/sections')
+    @UseGuards(
+        LogInGuard, 
+        IsTutorOrAdmin,
+        OwnsCourseGuard
+    )
     addSection(
-        @Param('id', ParseUUIDPipe) id: string,
+        @Param('courseId', ParseUUIDPipe) courseId: string,
         @Body() dto: CreateSectionDto
     ) {
-        return this.courseService.addSection(id, dto);
+        return this.courseService.addSection(courseId, dto);
     }
 
-    @Get('/:id/sections')
-    getSections(@Param('id', ParseUUIDPipe) id: string) {
-        return this.courseService.getSections(id);
+    @Get('/:courseId/sections')
+    getSections(@Param('courseId', ParseUUIDPipe) courseId: string) {
+        return this.courseService.getSections(courseId);
     }
 
-    @Delete('/sections/:sectionId')
-    @UseGuards(LogInGuard, IsTutorOrAdmin)
+    @Delete('/:courseId/sections/:sectionId')
     @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(
+        LogInGuard, 
+        IsTutorOrAdmin, 
+        OwnsCourseGuard
+    )
     deleteSection(
+        @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('sectionId', ParseIntPipe) sectionId: number
     ) {
-        return this.courseService.deleteSection(sectionId);
+        return this.courseService.deleteSection(courseId, sectionId);
     }
 
-    @Patch('/sections/:sectionId')
-    @UseGuards(LogInGuard, IsTutorOrAdmin)
+    @Patch('/:courseId/sections/:sectionId')
+    @UseGuards(
+        LogInGuard, 
+        IsTutorOrAdmin,
+        OwnsCourseGuard
+    )
     updateSection(
+        @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('sectionId', ParseIntPipe) sectionId: number,
         @Body() dto: UpdateSectionDto
     ) {
-        return this.courseService.updateSection(sectionId, dto);
+        return this.courseService.updateSection(courseId, sectionId, dto);
     }
 
     /* -----------------------------------------------
@@ -127,24 +141,28 @@ export class CourseController {
         return this.courseService.fetchCourseLectures(courseId);
     }
 
-    @Get('/sections/:sectionId/lectures')
+    @Get('/:courseId/sections/:sectionId/lectures')
     fetchSectionLectures(
+        @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('sectionId', ParseIntPipe) sectionId: number
     ) {
-        return this.courseService.fetchSectionLectures(sectionId);
+        return this.courseService.fetchSectionLectures(courseId, sectionId);
     }
 
-    @Get('/lectures/:lectureId')
+    @Get('/:courseId/lectures/:lectureId')
     fetchOneLecture(
+        @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('lectureId', ParseUUIDPipe) lectureId: string
     ) {
-        return this.courseService.fetchOneLecture(lectureId);
+        return this.courseService.fetchOneLecture(courseId, lectureId);
     }
     
-    @Get('/lectures/:lectureId/stream')
+    @Get('/:courseId/lectures/:lectureId/stream')
+    @UseGuards(LogInGuard)
     @HttpCode(HttpStatus.PARTIAL_CONTENT)
     async steamLecture(
         @Headers('range') range: string,
+        @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('lectureId', ParseUUIDPipe) lectureId: string,
         @Res({ passthrough: true }) response: Response
     ) { 
@@ -156,7 +174,7 @@ export class CourseController {
             end,
             filesize,
             bytesize
-        } = await this.courseService.fetchAndStreamLecture(lectureId, range);
+        } = await this.courseService.fetchAndStreamLecture(courseId, lectureId, range);
 
         response.set({
             'Accept-Ranges': 'bytes',
@@ -167,29 +185,35 @@ export class CourseController {
         return stream;
     }
 
-    @Post('/sections/:sectionId/lectures')
+    @Post('/:courseId/sections/:sectionId/lectures')
+    @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
     @UseInterceptors(FileInterceptor('file', createMulterOptions(OptionType.LECTURE)))
     uploadLecture(
+        @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('sectionId', ParseIntPipe) sectionId: number,
         @UploadedFile(ParseFilePipe) file: Express.Multer.File,
         @Body() dto: CreateLectureDto
     ) {
-        return this.courseService.createLecture(sectionId, file, dto);
+        return this.courseService.createLecture(courseId, sectionId, file, dto);
     }
 
-    @Delete('/lectures/:lectureId')
+    @Delete('/:courseId/lectures/:lectureId')
+    @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
     deleteLecture(
+        @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('lectureId') lectureId: string
     ) {
-        return this.courseService.deleteLecture(lectureId);
+        return this.courseService.deleteLecture(courseId, lectureId);
     }
 
-    @Patch('/lectures/:lectureId')
+    @Patch('/:courseId/lectures/:lectureId')
+    @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
     updateLecture(
+        @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('lectureId') lectureId: string,
         @UploadedFile(new ParseFilePipe({ fileIsRequired: false })) file: Express.Multer.File,
         @Body() dto: UpdateLectureDto
     ) {
-        return this.courseService.updateLecture(lectureId, dto, file);
+        return this.courseService.updateLecture(courseId, lectureId, dto, file);
     }
 }

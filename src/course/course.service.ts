@@ -3,9 +3,9 @@ import { stat, createReadStream } from 'fs';
 import { promisify } from 'util';
 import slugify from 'slugify';
 import { basename } from 'path';
-import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { Admin, EntityManager, Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { ICourseQuery } from './interfaces/course.interface';
 import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
@@ -32,6 +32,10 @@ export class CourseService {
         private lectureRepository: Repository<Lecture>,
         private entityManager: EntityManager
     ) {}
+
+    getCourseRepo() {
+        return this.courseRepository;
+    }
 
     async findAll(query: Partial<ICourseQuery> = {}, limit = 25, offset = 0) {
         const { 
@@ -134,13 +138,41 @@ export class CourseService {
         return { total: sections.length, sections: sections }
     }
 
-    deleteSection(sectionId: number) {
-        return this.sectionRepository.delete(sectionId);
+    /**
+     * Finds section by courseId and sectionId; fetches with inctructor data.
+     */
+    async findOneSection(courseId: string, sectionId: number) {
+        const section = await this.sectionRepository.findOne({
+            where: {
+                id: sectionId,
+                content: {
+                    course:{
+                        id: courseId
+                    }
+                }
+            },
+            relations: {
+                content: {
+                    course: {
+                        instructor: true
+                    }
+                }
+             }
+        })
+        const errMessage = `Course section with courseId - ${courseId} and sectionId - ${sectionId} not found.`
+        if (!section) throw new NotFoundException(errMessage);
+        return section;
     }
 
-    updateSection(sectionId: number, dto: UpdateSectionDto) {
-        if (Object.keys(dto).length === 0) return this.sectionRepository.findOneBy({ id: sectionId });
-        return this.sectionRepository.update(sectionId, dto);
+    async deleteSection(courseId: string, sectionId: number) {
+        const section = await this.findOneSection(courseId, sectionId);
+        return this.sectionRepository.delete(section);
+    }
+
+    async updateSection(courseId: string, sectionId: number, dto: UpdateSectionDto) {
+        const section = await this.findOneSection(courseId, sectionId);
+        if (Object.keys(dto).length === 0) return section;
+        return this.sectionRepository.update(section, dto);
     }
 
     async fetchCourseLectures(courseId: string) {
@@ -162,26 +194,41 @@ export class CourseService {
         return { total, lectures }
     }
 
-    async fetchSectionLectures(sectionId: number) {
+    async fetchSectionLectures(courseId: string, sectionId: number) {
         const [lectures, total] = await this.lectureRepository.findAndCount({
             where: {
                 section: {
-                    id: sectionId
+                    id: sectionId,
+                    content: {
+                        course: {
+                            id: courseId
+                        }
+                    }
                 }
             }
         })
         return { total, lectures };
     }
 
-    async fetchOneLecture(lectureId: string) {
-        const lecture = await this.lectureRepository.findOneBy({ id: lectureId });
+    async fetchOneLecture(courseId: string, lectureId: string) {
+        const lecture = await this.lectureRepository.findOne({ 
+            where: { 
+                id: lectureId,
+                section: {
+                    content: {
+                        course: {
+                            id: courseId
+                        }
+                    }
+                }
+             }
+         });
         if (!lecture) throw new NotFoundException('Lecture with specified id not found.');
         return lecture;
     }
 
-    async fetchAndStreamLecture(lectureId: string, range: string) {
-        console.log(range)
-        const lecture = await this.fetchOneLecture(lectureId);
+    async fetchAndStreamLecture(courseId: string, lectureId: string, range: string) {
+        const lecture = await this.fetchOneLecture(courseId, lectureId);
         const filepath = lecture.url;
         const filename = basename(filepath);
         const fileStats = await statPromise(lecture.url);
@@ -217,10 +264,9 @@ export class CourseService {
         }
     }
 
-    async createLecture(sectionId: number, file: Express.Multer.File, dto: CreateLectureDto) {
+    async createLecture(courseId: string, sectionId: number, file: Express.Multer.File, dto: CreateLectureDto) {
+        const section = await this.findOneSection(courseId, sectionId);
         const filePath = file.path;
-        const section = await this.sectionRepository.findOneBy({ id: sectionId });
-        if (!section) throw new NotFoundException('Section with specified id not found.');
 
         try {
             const newLecture = this.lectureRepository.create(dto)
@@ -233,12 +279,13 @@ export class CourseService {
         }
     }
 
-    deleteLecture(lectureId: string) {
-        return this.lectureRepository.delete(lectureId);
+    async deleteLecture(courseId: string, lectureId: string) {
+        const lecture = await this.fetchOneLecture(courseId, lectureId);
+        return this.lectureRepository.delete(lecture);
     }
 
-    async updateLecture(lectureId: string, dto: UpdateLectureDto, file?: Express.Multer.File) {
-        const lecture = await this.fetchOneLecture(lectureId);
+    async updateLecture(courseId: string, lectureId: string, dto: UpdateLectureDto, file?: Express.Multer.File) {
+        const lecture = await this.fetchOneLecture(courseId, lectureId);
         const oldFile = lecture.url;
         try {
             if (file) lecture.url = file.path;
