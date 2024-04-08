@@ -1,4 +1,4 @@
-import { diskStorage, Options, DiskStorageOptions, FileFilterCallback } from 'multer';
+import { diskStorage, FileFilterCallback } from 'multer';
 import * as dotenv from 'dotenv';
 import { extname, join, normalize } from 'path';
 import { BadRequestException } from '@nestjs/common';
@@ -20,7 +20,8 @@ const setStorageOptions = (destinationPath: string) => {
         filename: (req: Express.Request, file: Express.Multer.File, cb: Callback) => {
             const fileExt = extname(file.originalname);
             const fileName = normalize(file.originalname.split(fileExt)[0]);
-            const saveFileName = `${fileName}-${Date.now().toString()}${fileExt}`
+            const random  = Math.floor(Math.random() * 1000);
+            const saveFileName = `${fileName}-${Date.now().toString()}-${random}${fileExt}`;
             cb(null, saveFileName);
         }
     

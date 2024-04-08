@@ -208,6 +208,7 @@ export class CourseController {
 
     @Patch('/:courseId/lectures/:lectureId')
     @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
+    @UseInterceptors(FileInterceptor('file', createMulterOptions(OptionType.LECTURE)))
     updateLecture(
         @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('lectureId') lectureId: string,

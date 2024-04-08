@@ -22,7 +22,7 @@ export class CreateLectureDto {
 export class UpdateLectureDto {
     @IsString()
     @IsOptional()
-    @Length(50)
+    @Length(5, 50)
     title: string;
 
     @Min(1)

@@ -293,6 +293,7 @@ export class CourseService {
     async updateLecture(courseId: string, lectureId: string, dto: UpdateLectureDto, file?: Express.Multer.File) {
         const lecture = await this.fetchOneLecture(courseId, lectureId);
         const oldFile = lecture.url;
+
         try {
             if (file) lecture.url = file.path;
             const updatedLecture = await this.lectureRepository.save(Object.assign({}, lecture, dto));
