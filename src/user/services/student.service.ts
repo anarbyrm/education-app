@@ -105,4 +105,24 @@ export class StudentService {
     unfreeze(id: number) {
         return this.studentRepository.update(id, { isFrozen: false });
     }
+
+    async fetchCourses(id: number) {
+        const student = await this.studentRepository.findOne({
+            where: {
+                id
+            },
+            relations: {
+                courses: true
+            },
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                bio: true,
+                photo: true
+            }
+        });
+        if (!student) throw new NotFoundException('Student with specified id not found.');
+        return student;
+    }
 }

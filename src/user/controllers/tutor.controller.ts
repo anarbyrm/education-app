@@ -84,4 +84,9 @@ export class TutorController {
     unfreezeTutor(@Param('id', ParseIntPipe) id: number) {
         return this.tutorService.unfreeze(id);
     }
+
+    @Get('/:id/courses')
+    fetchAllCourses(@Param('id') id: number) {
+        return this.tutorService.fetchCourses(id);
+    }
 }

@@ -80,4 +80,22 @@ export class TutorService {
     unfreeze(id: number) {
         return this.tutorRepository.update(id, { isFrozen: false });
     }
+
+    async fetchCourses(id: number) {
+        const teacher = await this.tutorRepository.findOne({
+            where: { id },
+            relations: {
+                courses: true
+            },
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                bio: true,
+                photo: true
+            }
+        });
+        if (!teacher) throw new NotFoundException('Teacher with specified id not found.');
+        return teacher;
+    }
 }
