@@ -35,6 +35,7 @@ import { OptionType } from 'src/user/interfaces/student.interface';
 import { CreateLectureDto, UpdateLectureDto } from './dto/lecture.dto';
 import { Response } from 'express';
 import { OwnsCourseGuard } from './guards/owns-course.guard';
+import { HasPaidGuard } from './guards/has-paid.guard';
 
 
 @Controller('/courses')
@@ -68,14 +69,14 @@ export class CourseController {
     }
 
     @Delete('/:id')
-    @UseGuards(LogInGuard, IsTutorOrAdmin)
+    @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     deleteCourse(@Param('id', ParseUUIDPipe) id: string) {
         return this.courseService.deleteCourse(id);
     }
 
     @Patch('/:id')
-    @UseGuards(LogInGuard, IsTutorOrAdmin)
+    @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
     updateCourse(
         @Param('id', ParseUUIDPipe) id: string,
         @Body() dto: UpdateCourseDto
@@ -158,7 +159,7 @@ export class CourseController {
     }
     
     @Get('/:courseId/lectures/:lectureId/stream')
-    @UseGuards(LogInGuard)
+    @UseGuards(LogInGuard, HasPaidGuard)
     @HttpCode(HttpStatus.PARTIAL_CONTENT)
     async steamLecture(
         @Headers('range') range: string,
