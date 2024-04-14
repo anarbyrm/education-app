@@ -21,9 +21,9 @@ import {
     UseGuards,
     UseInterceptors
  } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CourseService } from './course.service';
-import { ICourseQuery } from './interfaces/course.interface';
+import { CourseQuery } from './interfaces/course.interface';
 import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
 import { LogInGuard } from 'src/user/guards/user.guards';
 import { ExtendedRequest } from 'src/user/interfaces/request.interface';
@@ -48,8 +48,10 @@ export class CourseController {
     ------------------COURSE ROUTES-------------------
     --------------------------------------------------*/
     @Get()
+    @ApiQuery({ name: 'limit', type: 'number' })
+    @ApiQuery({ name: 'offset', type: 'number' })
     fetchAll(
-        @Query() query?: ICourseQuery,
+        @Query() query?: CourseQuery,
         @Query('limit', new DefaultValuePipe(25), ParseIntPipe) limit?: number,
         @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset?: number
     ) {
@@ -57,6 +59,7 @@ export class CourseController {
     }
 
     @Get('/:id')
+    @ApiParam({ name: 'id', type: 'string' })
     fetchOne(@Param('id', ParseUUIDPipe) id: string) {
         return this.courseService.findOne(id);
     }
@@ -71,6 +74,7 @@ export class CourseController {
     }
 
     @Delete('/:id')
+    @ApiParam({ name: 'id', type: 'string' })
     @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     deleteCourse(@Param('id', ParseUUIDPipe) id: string) {
@@ -78,6 +82,7 @@ export class CourseController {
     }
 
     @Patch('/:id')
+    @ApiParam({ name: 'id', type: 'string' })
     @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
     updateCourse(
         @Param('id', ParseUUIDPipe) id: string,
@@ -89,6 +94,7 @@ export class CourseController {
     --------------COURSE SECTIONS ROUTES --------------
     --------------------------------------------------*/
     @Post('/:courseId/sections')
+    @ApiParam({ name: 'courseId', type: 'string' })
     @UseGuards(
         LogInGuard, 
         IsTutorOrAdmin,
@@ -102,11 +108,14 @@ export class CourseController {
     }
 
     @Get('/:courseId/sections')
+    @ApiParam({ name: 'courseId', type: 'string' })
     getSections(@Param('courseId', ParseUUIDPipe) courseId: string) {
         return this.courseService.getSections(courseId);
     }
 
     @Delete('/:courseId/sections/:sectionId')
+    @ApiParam({ name: 'courseId', type: 'string' })
+    @ApiParam({ name: 'sectionId', type: 'number' })
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(
         LogInGuard, 
@@ -121,6 +130,8 @@ export class CourseController {
     }
 
     @Patch('/:courseId/sections/:sectionId')
+    @ApiParam({ name: 'courseId', type: 'string' })
+    @ApiParam({ name: 'sectionId', type: 'number' })
     @UseGuards(
         LogInGuard, 
         IsTutorOrAdmin,
@@ -138,6 +149,7 @@ export class CourseController {
     -------------COURSE LECTURES ROUTES---------------
     --------------------------------------------------*/
     @Get('/:courseId/lectures')
+    @ApiParam({ name: 'courseId', type: 'string' })
     fetchCourseLectures(
         @Param('courseId', ParseUUIDPipe) courseId: string
     ) {
@@ -145,6 +157,8 @@ export class CourseController {
     }
 
     @Get('/:courseId/sections/:sectionId/lectures')
+    @ApiParam({ name: 'courseId', type: 'string' })
+    @ApiParam({ name: 'sectionId', type: 'number' })
     fetchSectionLectures(
         @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('sectionId', ParseIntPipe) sectionId: number
@@ -153,6 +167,8 @@ export class CourseController {
     }
 
     @Get('/:courseId/lectures/:lectureId')
+    @ApiParam({ name: 'courseId', type: 'string' })
+    @ApiParam({ name: 'lectureId', type: 'string' })
     fetchOneLecture(
         @Param('courseId', ParseUUIDPipe) courseId: string,
         @Param('lectureId', ParseUUIDPipe) lectureId: string
@@ -161,6 +177,8 @@ export class CourseController {
     }
     
     @Get('/:courseId/lectures/:lectureId/stream')
+    @ApiParam({ name: 'courseId', type: 'string' })
+    @ApiParam({ name: 'lectureId', type: 'string' })
     @UseGuards(LogInGuard, HasPaidGuard)
     @HttpCode(HttpStatus.PARTIAL_CONTENT)
     async steamLecture(
@@ -189,6 +207,20 @@ export class CourseController {
     }
 
     @Post('/:courseId/sections/:sectionId/lectures')
+    @ApiParam({ name: 'courseId', type: 'string' })
+    @ApiParam({ name: 'sectionId', type: 'number' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary'
+                }
+            }
+        }
+    })
     @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
     @UseInterceptors(FileInterceptor('file', createMulterOptions(OptionType.LECTURE)))
     uploadLecture(
@@ -201,6 +233,8 @@ export class CourseController {
     }
 
     @Delete('/:courseId/lectures/:lectureId')
+    @ApiParam({ name: 'courseId', type: 'string' })
+    @ApiParam({ name: 'lectureId', type: 'string' })
     @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
     deleteLecture(
         @Param('courseId', ParseUUIDPipe) courseId: string,
@@ -210,6 +244,20 @@ export class CourseController {
     }
 
     @Patch('/:courseId/lectures/:lectureId')
+    @ApiParam({ name: 'courseId', type: 'string' })
+    @ApiParam({ name: 'lectureId', type: 'string' })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            required: [],  // all fields are optional
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                }
+            }
+        }
+    })
     @UseGuards(LogInGuard, IsTutorOrAdmin, OwnsCourseGuard)
     @UseInterceptors(FileInterceptor('file', createMulterOptions(OptionType.LECTURE)))
     updateLecture(

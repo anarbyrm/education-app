@@ -13,7 +13,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
-import { ICourseQuery } from './interfaces/course.interface';
+import { CourseQuery } from './interfaces/course.interface';
 import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
 import { Tutor } from 'src/user/entities/tutor.entity';
 import { CourseContent } from './entities/course-content.entity';
@@ -43,7 +43,7 @@ export class CourseService {
         return this.courseRepository;
     }
 
-    async findAll(query: Partial<ICourseQuery> = {}, limit = 25, offset = 0) {
+    async findAll(query: Partial<CourseQuery> = {}, limit = 25, offset = 0) {
         const { 
             search,
             minPrice,
