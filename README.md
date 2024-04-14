@@ -1,73 +1,70 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# NestJS Udemy Clone
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This repository contains a clone project of Udemy built with NestJS. This project aims to replicate some of the core functionalities of the Udemy platform using the NestJS framework.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Presentation
 
-## Description
+This project serves as a learning resource for understanding how to build robust backend applications using NestJS, a progressive Node.js framework. It demonstrates various features of NestJS, including:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Controllers and Routing
+- Dependency Injection
+- Middleware
+- Authentication and Authorization
+- Database Integration (e.g., TypeORM, MongoDB)
+- Error Handling
+- Testing (e.g., Unit Testing, End-to-End Testing)
 
-## Installation
+By exploring this project, developers can gain insights into best practices for structuring and implementing backend applications with NestJS.
 
-```bash
-$ npm install
-```
+## Commands
 
-## Running the app
+To run the NestJS Udemy clone project locally, follow these steps:
 
-```bash
-# development
-$ npm run start
+1. **Clone the Repository:**
 
-# watch mode
-$ npm run start:dev
+   ```bash
+   git clone https://github.com/anarbyrm/education-app.git
 
-# production mode
-$ npm run start:prod
-```
+2. **Install Dependencies:**
 
-## Test
+    ```bash
+   cd education-app
+   npm install
 
-```bash
-# unit tests
-$ npm run test
+3. **Start the Development Server:**
 
-# e2e tests
-$ npm run test:e2e
+    ```bash
+    npm run start:dev
 
-# test coverage
-$ npm run test:cov
-```
+This command will start the development server. The server runs on: **_http://localhost:<port>_**.
 
-## Support
+4. **Set Up Environment Variables:**
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Before running the project, make sure to set up the necessary environment variables. Refer to the Environment Variables section below for a list of required variables.
 
-## Stay in touch
+The following environment variables need to be set up for the NestJS Udemy clone project to function correctly:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+    NODE_ENV=
+    HOST=
+    PORT=
 
-## License
+    JWT_SECRET=
+    AVATAR_MAX_SIZE=
 
-Nest is [MIT licensed](LICENSE).
+    SMTP_HOST=
+    SMTP_PORT=
+    SMTP_USERNAME=
+    SMTP_PASSWORD=
+    SMTP_SENDER=
+
+    SECRET=
+    VECTOR=
+    (Add any additional environment variables if necessary)
+
+Make sure to provide appropriate values for these variables in your development environment. You can set these variables in a .env file located in the root directory of the project.
+
+5. **Explore the API Endpoints:**
+
+Once the server is running, you can explore the available API endpoints using:
+- tools like Postman or cURL.
+- swagger API doc at **"/docs"** endpoint
