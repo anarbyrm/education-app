@@ -21,6 +21,7 @@ import { ContentSection } from './entities/content-section.entity';
 import { CreateSectionDto, UpdateSectionDto } from './dto/section.dto';
 import { Lecture } from './entities/lecture.entity';
 import { CreateLectureDto, UpdateLectureDto } from './dto/lecture.dto';
+import { Review } from './entities/review.entity';
 
 
 const statPromise = promisify(stat);
@@ -36,6 +37,8 @@ export class CourseService {
         private sectionRepository: Repository<ContentSection>,
         @InjectRepository(Lecture)
         private lectureRepository: Repository<Lecture>,
+        @InjectRepository(Review)
+        private reviewRepository: Repository<Review>,
         private entityManager: EntityManager
     ) {}
 
@@ -304,5 +307,35 @@ export class CourseService {
             if (file) await unlink(file.path);
             throw err;
         }
+    }
+
+    async fetchReviews(courseId: string) {
+        const courseWithReviews = await this.courseRepository.findOne({
+            where: { id: courseId },
+            relations: {
+                reviews: true
+            },
+            select: {
+                id: true,
+                title: true
+            }
+        });
+        
+        if (!courseWithReviews) throw new NotFoundException('Course with specified id not found.');
+        return courseWithReviews;
+    }
+
+    async fetchOneReview(courseId: string, reviewId: number) {
+        const courseReview = await this.reviewRepository.findOne({
+            where: {
+                id: reviewId,
+                course: {
+                    id: courseId
+                }
+            }
+        });
+
+        if (!courseReview) throw new NotFoundException('Course Review with specified id not found.');
+        return courseReview;
     }
 }

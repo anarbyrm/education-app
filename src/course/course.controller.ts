@@ -268,4 +268,39 @@ export class CourseController {
     ) {
         return this.courseService.updateLecture(courseId, lectureId, dto, file);
     }
+
+     /* -----------------------------------------------
+    ----------COURSE REVIEW & RATING ROUTES------------
+    --------------------------------------------------*/
+    @Get('/:courseId/reviews')
+    @ApiParam({ name: 'courseId', type: 'string' })
+    @UseGuards(LogInGuard)
+    getCourseReviews(@Param('courseId') courseId: string) {
+        return this.courseService.fetchReviews(courseId);
+    }
+
+    @Get('/:courseId/reviews/:reviewId')
+    @ApiParam({ name: 'courseId', type: 'string' })
+    @ApiParam({ name: 'reviewId', type: 'number' })
+    @UseGuards(LogInGuard)
+    getCourseReview(
+        @Param('courseId') courseId: string,
+        @Param('reviewId') reviewId: number
+    ) {
+        return this.courseService.fetchOneReview(courseId, reviewId);
+    }
+
+    /*
+    TODO:
+        - create review
+        - update review
+        - delete review
+
+        - get average rating for course
+        - get all ratings
+        - get one rating
+        - update rating
+        - delete rating
+    */
+    
 }
