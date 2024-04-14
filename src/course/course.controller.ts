@@ -21,6 +21,7 @@ import {
     UseGuards,
     UseInterceptors
  } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CourseService } from './course.service';
 import { ICourseQuery } from './interfaces/course.interface';
 import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
@@ -38,6 +39,7 @@ import { OwnsCourseGuard } from './guards/owns-course.guard';
 import { HasPaidGuard } from './guards/has-paid.guard';
 
 
+@ApiTags('courses')
 @Controller('/courses')
 export class CourseController {
     constructor(private courseService: CourseService) {}

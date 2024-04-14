@@ -4,7 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Tutor } from "../entities/tutor.entity";
 import { Repository } from "typeorm";
 import { CreateUserDto, UpdateUserDto } from "../dto/user.dto";
-import { IUserFilterQuery } from "../interfaces/user.interface";
+import { UserFilterQuery } from "../interfaces/user.interface";
 import { buildQuery } from "../user.helper";
 import { hashPassword } from "../../utils/password.util";
 
@@ -16,7 +16,7 @@ export class TutorService {
         private tutorRepository: Repository<Tutor>
     ) {}
 
-    async findAll(query: IUserFilterQuery, limit: number = 10, offset: number = 0) {
+    async findAll(query: UserFilterQuery, limit: number = 10, offset: number = 0) {
         let qb = this.tutorRepository.createQueryBuilder();
         qb = buildQuery<Tutor>(qb, query);
         // pagination

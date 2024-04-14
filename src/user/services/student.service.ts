@@ -7,7 +7,7 @@ import { hashPassword } from '../../utils/password.util';
 import { MailService } from '../../utils/email.util';
 import { CreateUserDto, UpdateUserDto } from '../dto/user.dto';
 import { createCipher } from '../../utils/cipher.util';
-import { IUserFilterQuery } from '../interfaces/user.interface';
+import { UserFilterQuery } from '../interfaces/user.interface';
 import { buildQuery } from '../user.helper';
 
 
@@ -19,7 +19,7 @@ export class StudentService {
         private mailService: MailService
     ) {}
     
-    async fetchAll(query?: IUserFilterQuery, limit = 10, offset = 0) {
+    async fetchAll(query?: UserFilterQuery, limit = 10, offset = 0) {
         let qb = this.studentRepository.createQueryBuilder();
         qb = buildQuery<Student>(qb, query);
 

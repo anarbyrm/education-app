@@ -1,9 +1,9 @@
 import { SelectQueryBuilder } from "typeorm";
-import { IUserFilterQuery } from "./interfaces/user.interface";
+import { UserFilterQuery } from "./interfaces/user.interface";
 import { BadRequestException } from "@nestjs/common";
 
 
-export const buildQuery = <T>(qb: SelectQueryBuilder<T>, query: IUserFilterQuery = {}) => {
+export const buildQuery = <T>(qb: SelectQueryBuilder<T>, query: UserFilterQuery = {}) => {
     let { search, email, active, frozen } = query;
 
     if (search) qb = qb.where('firstName LIKE :firstName', { firstName: `%${search}%` })
