@@ -3,6 +3,7 @@ import { UserModule } from './user/user.module';
 import { CourseModule } from './course/course.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { VerifyTokenMiddleware } from './user/middlewares/auth.middleware';
+import { PurchaseModule } from './purchase/purchase.module';
 
 
 @Module({
@@ -15,7 +16,8 @@ import { VerifyTokenMiddleware } from './user/middlewares/auth.middleware';
       synchronize: true
     }),
     UserModule,
-    CourseModule
+    CourseModule,
+    PurchaseModule
   ],
   controllers: [],
   providers: [],

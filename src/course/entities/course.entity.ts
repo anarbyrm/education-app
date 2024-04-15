@@ -17,6 +17,7 @@ import { CourseContent } from './course-content.entity';
 import { Rating } from './rating.entity';
 import { Review } from './review.entity';
 import { Category } from './category.entity';
+import { CartItem } from 'src/purchase/entities/cart-item.entity';
 
 
 @Entity()
@@ -74,4 +75,6 @@ export class Course {
     @OneToMany(() => Review, (review) => review.course)
     reviews: Review[];
 
+    @OneToMany(() => CartItem, (item) => item.product)
+    items: CartItem[];
 }
