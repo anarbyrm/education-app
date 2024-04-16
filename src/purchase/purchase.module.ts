@@ -8,10 +8,14 @@ import { Cart } from './entities/cart.entity';
 import { CartItem } from './entities/cart-item.entity';
 import { Purchase } from './entities/purchase.entity';
 import { OrderItem } from './entities/order-item.entity';
+import { CourseModule } from 'src/course/course.module';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Cart, CartItem, Purchase, OrderItem])],
+  imports: [
+    TypeOrmModule.forFeature([Cart, CartItem, Purchase, OrderItem]),
+    CourseModule
+  ],
   controllers: [PurchaseController, CartController],
   providers: [PurchaseService, CartService],
   exports: [TypeOrmModule]

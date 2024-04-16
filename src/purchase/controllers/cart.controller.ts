@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, ParseUUIDPipe, Post, Req, UseGuards } from "@nestjs/common";
 import { CartService } from "../services/cart.service";
 import { LogInGuard } from "src/user/guards/user.guards";
 import { ExtendedRequest } from "src/user/interfaces/request.interface";
@@ -16,17 +16,17 @@ export class CartController {
         return this.cartService.fetchCart(userId);
     }
 
-    @Post('/addItem')
+    @Post('/add-item')
     @UseGuards(LogInGuard) // TODO: add owner guard for cart
     addItemToCart(
         @Req() request: ExtendedRequest<Student>,
-        @Body('courseId') courseId: string
+        @Body('courseId', ParseUUIDPipe) courseId: string
     ) {
         const userId = request.user.id;
         return this.cartService.addToCart(userId, courseId);
     }
 
-    @Post('/removeItem')
+    @Post('/remove-item')
     @UseGuards(LogInGuard)
     removeItemFromCart(
         @Req() request: ExtendedRequest<Student>,

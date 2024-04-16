@@ -1,8 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Cart } from "../entities/cart.entity";
 import { CartItem } from "../entities/cart-item.entity";
+import { Course } from "src/course/entities/course.entity";
+import { NotFoundError } from "rxjs";
 
 
 @Injectable()
@@ -11,7 +13,9 @@ export class CartService {
         @InjectRepository(Cart)
         private cartRepository: Repository<Cart>,
         @InjectRepository(CartItem)
-        private cartItemRepository: Repository<CartItem>
+        private cartItemRepository: Repository<CartItem>,
+        @InjectRepository(Course)
+        private courseRepository: Repository<Course>
     ) {}
 
     async fetchCart(userId: number) {
@@ -23,7 +27,9 @@ export class CartService {
             },
             relations: {
                 user: true,
-                items: true
+                items: {
+                    product: true
+                }
             }
         })
 
@@ -51,11 +57,45 @@ export class CartService {
         return cart;
     }
 
-    addToCart(userId: number, courseId: string) {
+    private async getCartAndCourseAndCartItemIds(userId: number, courseId: string) {
+        const cart = await this.fetchCart(userId);
+        const course = await this.courseRepository.findOne({
+            where: {
+                id: courseId
+            }
+        });
 
+        if (!course) throw new NotFoundException('Course with specified id not found.');
+
+        const cartItemIds = cart.items.map((item) => item.product.id);
+        return { cart, course, cartItemIds }
     }
 
-    removeFromCart(userId: number, courseId: string) {
+    async addToCart(userId: number, courseId: string) {
+        const { cart, course, cartItemIds } = await this.getCartAndCourseAndCartItemIds(userId, courseId);
+        if (cartItemIds.includes(courseId)) throw new BadRequestException('Cart item already exists in the cart.');
+
+        const newCartItem = this.cartItemRepository.create({
+            capturedPrice: course.discountedPrice,
+            cart: cart,
+            product: course
+        })
+        await this.cartItemRepository.save(newCartItem);
+        return this.fetchCart(userId);
+    }
+
+    async removeFromCart(userId: number, courseId: string) {
+        const { cart, course, cartItemIds } = await this.getCartAndCourseAndCartItemIds(userId, courseId);
+        if (!cartItemIds.includes(course.id)) throw new BadRequestException('Cart item does not exists in the cart.');
+
+        // search for course and delete related item from the cart.
+        const seachedItemIndex = cartItemIds.indexOf(course.id);
+        const cartItemId = cart.items[seachedItemIndex].id;
+        await this.cartItemRepository.delete(cartItemId);
+        return this.fetchCart(userId);
+    }
+
+    emptyCart() {
 
     }
 }
