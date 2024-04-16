@@ -4,7 +4,6 @@ import { Repository } from "typeorm";
 import { Cart } from "../entities/cart.entity";
 import { CartItem } from "../entities/cart-item.entity";
 import { Course } from "src/course/entities/course.entity";
-import { NotFoundError } from "rxjs";
 
 
 @Injectable()
@@ -95,7 +94,9 @@ export class CartService {
         return this.fetchCart(userId);
     }
 
-    emptyCart() {
-
+    async emptyCart(userId: number) {
+        const cart = await this.fetchCart(userId);
+        cart.items = [];
+        return this.cartRepository.save(cart);
     }
 }

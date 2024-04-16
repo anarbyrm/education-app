@@ -36,4 +36,11 @@ export class CartController {
         return this.cartService.removeFromCart(userId, courseId);
     }
 
+    @Post('/empty')
+    emptyWholeCart(
+        @Req() request: ExtendedRequest<Student>
+    ) {
+        const userId = request.user.id;
+        return this.cartService.emptyCart(userId);
+    }
 }
